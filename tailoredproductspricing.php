@@ -1,5 +1,9 @@
 <?php
 
+use PrestaShopBundle\Form\Admin\Type\DisablingSwitchType;
+use PrestaShopBundle\Form\FormBuilderModifier;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
 if (!defined('_PS_VERSION_')) {
@@ -10,6 +14,13 @@ class TailoredProductsPricing extends Module
 {
     const INSTALL_SQL_FILE = 'sql/install.sql';
     const UNINSTALL_SQL_FILE = 'sql/uninstall.sql';
+
+    const FORM_THEME = '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig';
+
+    // CSS marker placed on the dimension field rows; the master toggle's disabling
+    // switch targets it to grey the fields out when the module is disabled.
+    const TPP_FIELD_CLASS = 'js-tpp-dimension-field';
+    const TPP_FIELD_SELECTOR = '.js-tpp-dimension-field';
 
     public function __construct()
     {
@@ -39,8 +50,9 @@ class TailoredProductsPricing extends Module
         }
 
         return parent::install()
-            && $this->registerHook('displayAdminProductsExtra')
-            && $this->registerHook('actionProductSave')
+            && $this->registerHook('actionProductFormBuilderModifier')
+            && $this->registerHook('actionProductFormDataProviderData')
+            && $this->registerHook('actionAfterUpdateProductFormHandler')
             && $this->registerHook('actionCombinationFormFormBuilderModifier')
             && $this->registerHook('actionCombinationFormFormDataProviderData')
             && $this->registerHook('actionAfterUpdateCombinationFormFormHandler');
@@ -75,43 +87,116 @@ class TailoredProductsPricing extends Module
     }
 
     // -------------------------------------------------------------------------
-    // Admin product tab
+    // Admin product form — Details tab
     // -------------------------------------------------------------------------
 
-    public function hookDisplayAdminProductsExtra($params)
+    /**
+     * Adds the per-product configuration fields to the product "Details" tab.
+     */
+    public function hookActionProductFormBuilderModifier(array $params): void
     {
-        $idProduct = (int) ($params['id_product'] ?? 0);
-        $config = $this->getProductConfig($idProduct);
+        $builder = $params['form_builder'];
+        if (!$builder->has('details')) {
+            return;
+        }
 
-        $this->context->smarty->assign([
-            'tpp_config' => $config,
-            'tpp_id_product' => $idProduct,
+        $details = $builder->get('details');
+        $modifier = new FormBuilderModifier();
+
+        // Insert each field directly before "references" (the first Details-tab
+        // field) so they render at the very top, in declared order.
+
+        // Section heading (non-mapped: never enters the form data nor the save handler).
+        $modifier->addBefore($details, 'references', 'tpp_heading', FormType::class, [
+            'label' => $this->trans('Tailored Products Pricing', [], 'Modules.Tailoredproductspricing.Admin'),
+            'label_tag_name' => 'h3',
+            'mapped' => false,
+            'required' => false,
+            'form_theme' => self::FORM_THEME,
         ]);
 
-        return $this->display(__FILE__, 'views/templates/admin/product_tab.tpl');
+        // Master toggle: when off, the dimension fields below are disabled (greyed
+        // out) via the disabling-switch JS component (matches rows by selector).
+        $modifier->addBefore($details, 'references', 'tpp_enabled', DisablingSwitchType::class, [
+            'label' => $this->trans('Enable price-per-square-meter for this product', [], 'Modules.Tailoredproductspricing.Admin'),
+            'required' => false,
+            'target_selector' => self::TPP_FIELD_SELECTOR,
+            'disable_on_match' => true,
+            'form_theme' => self::FORM_THEME,
+        ]);
+
+        $modifier->addBefore($details, 'references', 'tpp_unit', ChoiceType::class, [
+            'label' => $this->trans('Dimension unit', [], 'Modules.Tailoredproductspricing.Admin'),
+            'required' => false,
+            'choices' => ['cm' => 'cm', 'mm' => 'mm'],
+            'placeholder' => false,
+            'row_attr' => ['class' => self::TPP_FIELD_CLASS],
+            'form_theme' => self::FORM_THEME,
+        ]);
+
+        $numberFields = [
+            'tpp_min_width' => $this->trans('Min width', [], 'Modules.Tailoredproductspricing.Admin'),
+            'tpp_max_width' => $this->trans('Max width', [], 'Modules.Tailoredproductspricing.Admin'),
+            'tpp_min_height' => $this->trans('Min height', [], 'Modules.Tailoredproductspricing.Admin'),
+            'tpp_max_height' => $this->trans('Max height', [], 'Modules.Tailoredproductspricing.Admin'),
+        ];
+
+        foreach ($numberFields as $name => $label) {
+            $modifier->addBefore($details, 'references', $name, NumberType::class, [
+                'label' => $label,
+                'required' => false,
+                'scale' => 2,
+                'attr' => ['min' => '0', 'step' => '0.01'],
+                'row_attr' => ['class' => self::TPP_FIELD_CLASS],
+                'form_theme' => self::FORM_THEME,
+            ]);
+        }
     }
 
-    public function hookActionProductSave($params)
+    /**
+     * Pre-fills the Details-tab fields with the stored configuration when the
+     * product edit form is loaded.
+     */
+    public function hookActionProductFormDataProviderData(array $params): void
     {
-        $idProduct = (int) ($params['id_product'] ?? 0);
+        $idProduct = (int) ($params['id'] ?? 0);
+        $config = $this->getProductConfig($idProduct);
+
+        $params['data']['details']['tpp_enabled'] = $config ? 1 : 0;
+        $params['data']['details']['tpp_unit'] = $config['unit'] ?? 'cm';
+        $params['data']['details']['tpp_min_width'] = $config['min_width'] ?? null;
+        $params['data']['details']['tpp_max_width'] = $config['max_width'] ?? null;
+        $params['data']['details']['tpp_min_height'] = $config['min_height'] ?? null;
+        $params['data']['details']['tpp_max_height'] = $config['max_height'] ?? null;
+    }
+
+    /**
+     * Persists the Details-tab fields after the product edit form is saved.
+     */
+    public function hookActionAfterUpdateProductFormHandler(array $params): void
+    {
+        $idProduct = (int) ($params['id'] ?? 0);
         if (!$idProduct) {
             return;
         }
 
-        $enabled = (bool) Tools::getValue('tpp_enabled');
+        $details = $params['form_data']['details'] ?? [];
+        $enabled = (bool) ($details['tpp_enabled'] ?? false);
 
         if (!$enabled) {
             Db::getInstance()->delete('tpp_product_config', 'id_product = ' . $idProduct);
             return;
         }
 
+        $unit = in_array($details['tpp_unit'] ?? 'cm', ['cm', 'mm'], true) ? $details['tpp_unit'] : 'cm';
+
         $data = [
             'id_product'   => $idProduct,
-            'min_width'    => $this->nullableDecimal(Tools::getValue('tpp_min_width')),
-            'max_width'    => $this->nullableDecimal(Tools::getValue('tpp_max_width')),
-            'min_height'   => $this->nullableDecimal(Tools::getValue('tpp_min_height')),
-            'max_height'   => $this->nullableDecimal(Tools::getValue('tpp_max_height')),
-            'unit'         => in_array(Tools::getValue('tpp_unit'), ['cm', 'mm']) ? Tools::getValue('tpp_unit') : 'cm',
+            'min_width'    => $this->nullableDecimal($details['tpp_min_width'] ?? null),
+            'max_width'    => $this->nullableDecimal($details['tpp_max_width'] ?? null),
+            'min_height'   => $this->nullableDecimal($details['tpp_min_height'] ?? null),
+            'max_height'   => $this->nullableDecimal($details['tpp_max_height'] ?? null),
+            'unit'         => $unit,
         ];
 
         $exists = Db::getInstance()->getValue(
