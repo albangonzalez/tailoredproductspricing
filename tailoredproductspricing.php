@@ -1,14 +1,13 @@
 <?php
 
-use PrestaShopBundle\Form\Admin\Type\DisablingSwitchType;
+use PrestaShop\Module\TailoredProductsPricing\Form\Type\TailoredProductsSettingsType;
 use PrestaShopBundle\Form\FormBuilderModifier;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+require_once __DIR__ . '/vendor/autoload.php';
 
 class TailoredProductsPricing extends Module
 {
@@ -17,17 +16,12 @@ class TailoredProductsPricing extends Module
 
     const FORM_THEME = '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig';
 
-    // CSS marker placed on the dimension field rows; the master toggle's disabling
-    // switch targets it to grey the fields out when the module is disabled.
-    const TPP_FIELD_CLASS = 'js-tpp-dimension-field';
-    const TPP_FIELD_SELECTOR = '.js-tpp-dimension-field';
-
     public function __construct()
     {
         $this->name = 'tailoredproductspricing';
         $this->tab = 'pricing_promotion';
         $this->version = '1.0.0';
-        $this->author = 'Alban González';
+        $this->author = 'Pentalux';
         $this->need_instance = 0;
         $this->bootstrap = true;
 
@@ -40,7 +34,7 @@ class TailoredProductsPricing extends Module
             'Modules.Tailoredproductspricing.Admin'
         );
 
-        $this->ps_versions_compliancy = ['min' => '8.0.0', 'max' => _PS_VERSION_];
+        $this->ps_versions_compliancy = ['min' => '9.0.0', 'max' => _PS_VERSION_];
     }
 
     public function install()
@@ -90,9 +84,6 @@ class TailoredProductsPricing extends Module
     // Admin product form — Details tab
     // -------------------------------------------------------------------------
 
-    /**
-     * Adds the per-product configuration fields to the product "Details" tab.
-     */
     public function hookActionProductFormBuilderModifier(array $params): void
     {
         $builder = $params['form_builder'];
@@ -103,54 +94,9 @@ class TailoredProductsPricing extends Module
         $details = $builder->get('details');
         $modifier = new FormBuilderModifier();
 
-        // Insert each field directly before "references" (the first Details-tab
-        // field) so they render at the very top, in declared order.
-
-        // Section heading (non-mapped: never enters the form data nor the save handler).
-        $modifier->addBefore($details, 'references', 'tpp_heading', FormType::class, [
-            'label' => $this->trans('Tailored Products Pricing', [], 'Modules.Tailoredproductspricing.Admin'),
-            'label_tag_name' => 'h3',
-            'mapped' => false,
-            'required' => false,
-            'form_theme' => self::FORM_THEME,
+        $modifier->addBefore($details, 'references', 'tpp_settings', TailoredProductsSettingsType::class, [
+            'tpp_module' => $this,
         ]);
-
-        // Master toggle: when off, the dimension fields below are disabled (greyed
-        // out) via the disabling-switch JS component (matches rows by selector).
-        $modifier->addBefore($details, 'references', 'tpp_enabled', DisablingSwitchType::class, [
-            'label' => $this->trans('Enable price-per-square-meter for this product', [], 'Modules.Tailoredproductspricing.Admin'),
-            'required' => false,
-            'target_selector' => self::TPP_FIELD_SELECTOR,
-            'disable_on_match' => true,
-            'form_theme' => self::FORM_THEME,
-        ]);
-
-        $modifier->addBefore($details, 'references', 'tpp_unit', ChoiceType::class, [
-            'label' => $this->trans('Dimension unit', [], 'Modules.Tailoredproductspricing.Admin'),
-            'required' => false,
-            'choices' => ['cm' => 'cm', 'mm' => 'mm'],
-            'placeholder' => false,
-            'row_attr' => ['class' => self::TPP_FIELD_CLASS],
-            'form_theme' => self::FORM_THEME,
-        ]);
-
-        $numberFields = [
-            'tpp_min_width' => $this->trans('Min width', [], 'Modules.Tailoredproductspricing.Admin'),
-            'tpp_max_width' => $this->trans('Max width', [], 'Modules.Tailoredproductspricing.Admin'),
-            'tpp_min_height' => $this->trans('Min height', [], 'Modules.Tailoredproductspricing.Admin'),
-            'tpp_max_height' => $this->trans('Max height', [], 'Modules.Tailoredproductspricing.Admin'),
-        ];
-
-        foreach ($numberFields as $name => $label) {
-            $modifier->addBefore($details, 'references', $name, NumberType::class, [
-                'label' => $label,
-                'required' => false,
-                'scale' => 2,
-                'attr' => ['min' => '0', 'step' => '0.01'],
-                'row_attr' => ['class' => self::TPP_FIELD_CLASS],
-                'form_theme' => self::FORM_THEME,
-            ]);
-        }
     }
 
     /**
@@ -162,12 +108,12 @@ class TailoredProductsPricing extends Module
         $idProduct = (int) ($params['id'] ?? 0);
         $config = $this->getProductConfig($idProduct);
 
-        $params['data']['details']['tpp_enabled'] = $config ? 1 : 0;
-        $params['data']['details']['tpp_unit'] = $config['unit'] ?? 'cm';
-        $params['data']['details']['tpp_min_width'] = $config['min_width'] ?? null;
-        $params['data']['details']['tpp_max_width'] = $config['max_width'] ?? null;
-        $params['data']['details']['tpp_min_height'] = $config['min_height'] ?? null;
-        $params['data']['details']['tpp_max_height'] = $config['max_height'] ?? null;
+        $params['data']['details']['tpp_settings']['tpp_enabled'] = $config ? 1 : 0;
+        $params['data']['details']['tpp_settings']['tpp_unit'] = $config['unit'] ?? 'cm';
+        $params['data']['details']['tpp_settings']['tpp_min_width'] = $config['min_width'] ?? null;
+        $params['data']['details']['tpp_settings']['tpp_max_width'] = $config['max_width'] ?? null;
+        $params['data']['details']['tpp_settings']['tpp_min_height'] = $config['min_height'] ?? null;
+        $params['data']['details']['tpp_settings']['tpp_max_height'] = $config['max_height'] ?? null;
     }
 
     /**
@@ -180,22 +126,22 @@ class TailoredProductsPricing extends Module
             return;
         }
 
-        $details = $params['form_data']['details'] ?? [];
-        $enabled = (bool) ($details['tpp_enabled'] ?? false);
+        $tpp = $params['form_data']['details']['tpp_settings'] ?? [];
+        $enabled = (bool) ($tpp['tpp_enabled'] ?? false);
 
         if (!$enabled) {
             Db::getInstance()->delete('tpp_product_config', 'id_product = ' . $idProduct);
             return;
         }
 
-        $unit = in_array($details['tpp_unit'] ?? 'cm', ['cm', 'mm'], true) ? $details['tpp_unit'] : 'cm';
+        $unit = in_array($tpp['tpp_unit'] ?? 'cm', ['cm', 'mm'], true) ? $tpp['tpp_unit'] : 'cm';
 
         $data = [
             'id_product'   => $idProduct,
-            'min_width'    => $this->nullableDecimal($details['tpp_min_width'] ?? null),
-            'max_width'    => $this->nullableDecimal($details['tpp_max_width'] ?? null),
-            'min_height'   => $this->nullableDecimal($details['tpp_min_height'] ?? null),
-            'max_height'   => $this->nullableDecimal($details['tpp_max_height'] ?? null),
+            'min_width'    => $this->nullableDecimal($tpp['tpp_min_width'] ?? null),
+            'max_width'    => $this->nullableDecimal($tpp['tpp_max_width'] ?? null),
+            'min_height'   => $this->nullableDecimal($tpp['tpp_min_height'] ?? null),
+            'max_height'   => $this->nullableDecimal($tpp['tpp_max_height'] ?? null),
             'unit'         => $unit,
         ];
 

@@ -1,0 +1,10 @@
+{
+    "name": "pentalux/tailoredproductspricing",
+    "type": "prestashop-module",
+    "autoload": {
+        "psr-4": {
+            "PrestaShop\\Module\\TailoredProductsPricing\\": "src/"
+        }
+    },
+    "require": {}
+}

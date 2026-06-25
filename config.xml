@@ -4,7 +4,7 @@
     <displayName><![CDATA[Tailored Products Pricing]]></displayName>
     <version><![CDATA[1.0.0]]></version>
     <description><![CDATA[Let customers define custom dimensions (width × height) for each product — price is calculated automatically.]]></description>
-    <author><![CDATA[Alban González]]></author>
+    <author><![CDATA[Pentalux]]></author>
     <is_configurable>0</is_configurable>
     <need_instance>0</need_instance>
     <limited_countries></limited_countries>
