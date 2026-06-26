@@ -1,0 +1,6 @@
+services:
+    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier:
+        autowire: true
+        public: true
+        arguments:
+            $formBuilderModifier: '@form.form_builder_modifier'

@@ -21,8 +21,6 @@ class TailoredProductsSettingsType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $m = $options['tpp_module'];
-
         $builder
             ->add('tpp_heading', FormType::class, [
                 'label' => 'Tailored Products Pricing',
@@ -66,7 +64,6 @@ class TailoredProductsSettingsType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setRequired('tpp_module');
         $resolver->setDefaults(['label' => false]);
     }
 }

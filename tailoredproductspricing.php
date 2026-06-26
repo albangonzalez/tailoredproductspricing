@@ -1,7 +1,7 @@
 <?php
 
-use PrestaShop\Module\TailoredProductsPricing\Form\Type\TailoredProductsSettingsType;
-use PrestaShopBundle\Form\FormBuilderModifier;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -86,17 +86,8 @@ class TailoredProductsPricing extends Module
 
     public function hookActionProductFormBuilderModifier(array $params): void
     {
-        $builder = $params['form_builder'];
-        if (!$builder->has('details')) {
-            return;
-        }
-
-        $details = $builder->get('details');
-        $modifier = new FormBuilderModifier();
-
-        $modifier->addBefore($details, 'references', 'tpp_settings', TailoredProductsSettingsType::class, [
-            'tpp_module' => $this,
-        ]);
+        $productFormModifier = $this->get(ProductFormModifier::class);
+        $productFormModifier->modify((int) ($params['id'] ?? 0), $params['form_builder']);
     }
 
     /**
