@@ -1,14 +1,32 @@
 services:
-    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier:
+    _defaults:
         autowire: true
+        autoconfigure: false
         public: true
+
+    # Form modifiers
+    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier:
         arguments:
             $formBuilderModifier: '@form.form_builder_modifier'
 
-    PrestaShop\Module\TailoredProductsPricing\Adapter\CombinationConfigRepository:
-        autowire: true
-        public: true
+    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier: ~
+        # autowires CombinationEnablementChecker by type
 
-    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier:
-        autowire: true
-        public: true
+    # Services
+    PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager: ~
+    PrestaShop\Module\TailoredProductsPricing\Service\CombinationEnablementChecker:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
+    # Repositories
+    PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
+        class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository
+        factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
+        arguments:
+            - PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig
+
+    PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository:
+        class: PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository
+        factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
+        arguments:
+            - PrestaShop\Module\TailoredProductsPricing\Entity\TppCombinationConfig

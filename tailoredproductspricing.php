@@ -1,8 +1,9 @@
 <?php
 
-use PrestaShop\Module\TailoredProductsPricing\Adapter\CombinationConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
+use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -98,14 +99,8 @@ class TailoredProductsPricing extends Module
     public function hookActionProductFormDataProviderData(array $params): void
     {
         $idProduct = (int) ($params['id'] ?? 0);
-        $config = $this->getProductConfig($idProduct);
 
-        $params['data']['details']['tpp_settings']['tpp_enabled'] = $config ? 1 : 0;
-        $params['data']['details']['tpp_settings']['tpp_unit'] = $config['unit'] ?? 'cm';
-        $params['data']['details']['tpp_settings']['tpp_min_width'] = $config['min_width'] ?? null;
-        $params['data']['details']['tpp_settings']['tpp_max_width'] = $config['max_width'] ?? null;
-        $params['data']['details']['tpp_settings']['tpp_min_height'] = $config['min_height'] ?? null;
-        $params['data']['details']['tpp_settings']['tpp_max_height'] = $config['max_height'] ?? null;
+        $params['data']['details']['tpp_settings'] = $this->get(ProductConfigManager::class)->toFormData($idProduct);
     }
 
     /**
@@ -114,38 +109,9 @@ class TailoredProductsPricing extends Module
     public function hookActionAfterUpdateProductFormHandler(array $params): void
     {
         $idProduct = (int) ($params['id'] ?? 0);
-        if (!$idProduct) {
-            return;
-        }
-
         $tpp = $params['form_data']['details']['tpp_settings'] ?? [];
-        $enabled = (bool) ($tpp['tpp_enabled'] ?? false);
 
-        if (!$enabled) {
-            Db::getInstance()->delete('tpp_product_config', 'id_product = ' . $idProduct);
-            return;
-        }
-
-        $unit = in_array($tpp['tpp_unit'] ?? 'cm', ['cm', 'mm'], true) ? $tpp['tpp_unit'] : 'cm';
-
-        $data = [
-            'id_product'   => $idProduct,
-            'min_width'    => $this->nullableDecimal($tpp['tpp_min_width'] ?? null),
-            'max_width'    => $this->nullableDecimal($tpp['tpp_max_width'] ?? null),
-            'min_height'   => $this->nullableDecimal($tpp['tpp_min_height'] ?? null),
-            'max_height'   => $this->nullableDecimal($tpp['tpp_max_height'] ?? null),
-            'unit'         => $unit,
-        ];
-
-        $exists = Db::getInstance()->getValue(
-            'SELECT id_product FROM `' . _DB_PREFIX_ . 'tpp_product_config` WHERE id_product = ' . $idProduct
-        );
-
-        if ($exists) {
-            Db::getInstance()->update('tpp_product_config', $data, 'id_product = ' . $idProduct);
-        } else {
-            Db::getInstance()->insert('tpp_product_config', $data);
-        }
+        $this->get(ProductConfigManager::class)->saveFromFormData($idProduct, $tpp);
     }
 
     // -------------------------------------------------------------------------
@@ -169,7 +135,7 @@ class TailoredProductsPricing extends Module
 
     public function hookActionAfterUpdateCombinationFormFormHandler(array $params): void
     {
-        $this->get(CombinationConfigRepository::class)->upsert(
+        $this->get(CombinationConfigRepository::class)->save(
             (int) ($params['id'] ?? 0),
             (float) ($params['form_data']['tpp_price_per_sqm'] ?? 0)
         );
@@ -181,23 +147,6 @@ class TailoredProductsPricing extends Module
 
     public function getProductConfig(int $idProduct): ?array
     {
-        if (!$idProduct) {
-            return null;
-        }
-
-        $row = Db::getInstance()->getRow(
-            'SELECT * FROM `' . _DB_PREFIX_ . 'tpp_product_config` WHERE id_product = ' . $idProduct
-        );
-
-        return $row ?: null;
-    }
-
-    private function nullableDecimal($value): ?float
-    {
-        $value = trim((string) $value);
-        if ($value === '' || $value === null) {
-            return null;
-        }
-        return (float) str_replace(',', '.', $value);
+        return $this->get(ProductConfigManager::class)->getConfigArray($idProduct);
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\TailoredProductsPricing\Form\Modifier;
 
-use PrestaShop\Module\TailoredProductsPricing\Adapter\CombinationConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Form\Type\PricePerSqmType;
+use PrestaShop\Module\TailoredProductsPricing\Service\CombinationEnablementChecker;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
@@ -21,13 +21,13 @@ use Symfony\Component\Form\FormBuilderInterface;
 final class CombinationFormModifier
 {
     public function __construct(
-        private readonly CombinationConfigRepository $combinationConfigRepository
+        private readonly CombinationEnablementChecker $combinationEnablementChecker
     ) {
     }
 
     public function modify(?int $combinationId, FormBuilderInterface $combinationFormBuilder, array $data): void
     {
-        if (!$this->combinationConfigRepository->isModuleEnabledForCombination((int) $combinationId)) {
+        if (!$this->combinationEnablementChecker->isModuleEnabledForCombination((int) $combinationId)) {
             return;
         }
 

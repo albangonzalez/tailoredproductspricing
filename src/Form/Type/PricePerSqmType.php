@@ -29,7 +29,7 @@ final class PricePerSqmType extends AbstractType
             'scale' => 2,
             'required' => false,
             'attr' => [
-                'placeholder' => '0.000000',
+                'placeholder' => '0.00',
                 'min' => '0',
                 'step' => 'any',
             ],

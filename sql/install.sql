@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS `PREFIX_tpp_product_config` (
 
 CREATE TABLE IF NOT EXISTS `PREFIX_tpp_combination_config` (
   `id_product_attribute` int(10) unsigned NOT NULL,
-  `price_per_sqm` decimal(20,6) NOT NULL DEFAULT '0.000000',
+  `price_per_sqm` decimal(20,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id_product_attribute`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4;
