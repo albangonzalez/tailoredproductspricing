@@ -4,3 +4,11 @@ services:
         public: true
         arguments:
             $formBuilderModifier: '@form.form_builder_modifier'
+
+    PrestaShop\Module\TailoredProductsPricing\Adapter\CombinationConfigRepository:
+        autowire: true
+        public: true
+
+    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier:
+        autowire: true
+        public: true

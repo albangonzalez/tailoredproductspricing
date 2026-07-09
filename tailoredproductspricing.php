@@ -1,6 +1,7 @@
 <?php
 
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use PrestaShop\Module\TailoredProductsPricing\Adapter\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
 
 if (!defined('_PS_VERSION_')) {
@@ -153,64 +154,25 @@ class TailoredProductsPricing extends Module
 
     public function hookActionCombinationFormFormBuilderModifier(array $params): void
     {
-        // Only expose the per-combination price field when the parent product has
-        // the module enabled — i.e. it has a row in tpp_product_config.
-        if (!$this->isCombinationProductEnabled((int) ($params['id'] ?? 0))) {
-            return;
-        }
-
-        $params['form_builder']->add('tpp_price_per_sqm', NumberType::class, [
-            'label' => $this->trans('Price per m²', [], 'Modules.Tailoredproductspricing.Admin'),
-            'scale' => 2,
-            'attr' => [
-                'placeholder' => '0.000000',
-                'min' => '0',
-                'step' => 'any',
-            ],
-            'required' => false,
-            'data' => $params['data']['tpp_price_per_sqm'] ?? 0,
-            'form_theme' => '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig',
-        ]);
+        $this->get(CombinationFormModifier::class)->modify(
+            (int) ($params['id'] ?? 0),
+            $params['form_builder'],
+            $params['data'] ?? []
+        );
     }
 
     public function hookActionCombinationFormFormDataProviderData(array $params): void
     {
-        $combinationId = (int) ($params['id'] ?? 0);
-
-        $row = Db::getInstance()->getRow(
-            'SELECT price_per_sqm FROM `' . _DB_PREFIX_ . 'tpp_combination_config`
-             WHERE id_product_attribute = ' . $combinationId
-        );
-
-        $params['data']['tpp_price_per_sqm'] = $row ? (float) $row['price_per_sqm'] : 0;
+        $params['data']['tpp_price_per_sqm'] = $this->get(CombinationConfigRepository::class)
+            ->getPricePerSqm((int) ($params['id'] ?? 0));
     }
 
     public function hookActionAfterUpdateCombinationFormFormHandler(array $params): void
     {
-        $combinationId = (int) ($params['id'] ?? 0);
-        if (!$combinationId) {
-            return;
-        }
-
-        $pricePerSqm = (float) ($params['form_data']['tpp_price_per_sqm'] ?? 0);
-
-        $exists = Db::getInstance()->getValue(
-            'SELECT id_product_attribute FROM `' . _DB_PREFIX_ . 'tpp_combination_config`
-             WHERE id_product_attribute = ' . $combinationId
+        $this->get(CombinationConfigRepository::class)->upsert(
+            (int) ($params['id'] ?? 0),
+            (float) ($params['form_data']['tpp_price_per_sqm'] ?? 0)
         );
-
-        if ($exists) {
-            Db::getInstance()->update(
-                'tpp_combination_config',
-                ['price_per_sqm' => $pricePerSqm],
-                'id_product_attribute = ' . $combinationId
-            );
-        } else {
-            Db::getInstance()->insert('tpp_combination_config', [
-                'id_product_attribute' => $combinationId,
-                'price_per_sqm' => $pricePerSqm,
-            ]);
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -228,24 +190,6 @@ class TailoredProductsPricing extends Module
         );
 
         return $row ?: null;
-    }
-
-    /**
-     * Tells whether the module is enabled for the product behind a combination,
-     * i.e. that product has a row in tpp_product_config.
-     */
-    private function isCombinationProductEnabled(int $idProductAttribute): bool
-    {
-        if (!$idProductAttribute) {
-            return false;
-        }
-
-        $idProduct = (int) Db::getInstance()->getValue(
-            'SELECT id_product FROM `' . _DB_PREFIX_ . 'product_attribute`
-             WHERE id_product_attribute = ' . $idProductAttribute
-        );
-
-        return $idProduct > 0 && $this->getProductConfig($idProduct) !== null;
     }
 
     private function nullableDecimal($value): ?float
