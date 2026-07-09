@@ -161,7 +161,7 @@ class TailoredProductsPricing extends Module
 
         $params['form_builder']->add('tpp_price_per_sqm', NumberType::class, [
             'label' => $this->trans('Price per m²', [], 'Modules.Tailoredproductspricing.Admin'),
-            'scale' => 6,
+            'scale' => 2,
             'attr' => [
                 'placeholder' => '0.000000',
                 'min' => '0',
