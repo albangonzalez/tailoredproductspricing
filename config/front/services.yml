@@ -1,0 +1,14 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: false
+        public: true
+
+    PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider: ~
+        # autowires ProductConfigRepository by type
+
+    PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
+        class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository
+        factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
+        arguments:
+            - PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig

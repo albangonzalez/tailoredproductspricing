@@ -3,6 +3,7 @@
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider;
 use PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager;
 
 if (!defined('_PS_VERSION_')) {
@@ -51,7 +52,8 @@ class TailoredProductsPricing extends Module
             && $this->registerHook('actionAfterUpdateProductFormHandler')
             && $this->registerHook('actionCombinationFormFormBuilderModifier')
             && $this->registerHook('actionCombinationFormFormDataProviderData')
-            && $this->registerHook('actionAfterUpdateCombinationFormFormHandler');
+            && $this->registerHook('actionAfterUpdateCombinationFormFormHandler')
+            && $this->registerHook('displayProductCustomization');
     }
 
     public function uninstall()
@@ -139,6 +141,24 @@ class TailoredProductsPricing extends Module
             (int) ($params['id'] ?? 0),
             (float) ($params['form_data']['tpp_price_per_sqm'] ?? 0)
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // Front office — product page dimensions form
+    // -------------------------------------------------------------------------
+
+    public function hookDisplayProductCustomization(array $params): string
+    {
+        $idProduct = (int) ($params['product']['id'] ?? $params['product']['id_product'] ?? 0);
+
+        $data = $this->get(DimensionsFieldsProvider::class)->getViewData($idProduct);
+        if ($data === null) {
+            return '';
+        }
+
+        $this->context->smarty->assign($data);
+
+        return $this->display(__FILE__, 'product-customization.tpl');
     }
 
     // -------------------------------------------------------------------------
