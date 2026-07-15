@@ -1,0 +1,26 @@
+.tpp-dimensions-form {
+    margin-bottom: 1.5rem;
+}
+
+.tpp-dimensions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.tpp-dimensions-label {
+    flex-basis: 100%;
+}
+
+.tpp-dimensions-label .form-label {
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.tpp-dimension-field {
+    flex: 1 1 12rem;
+    min-width: 0;
+}

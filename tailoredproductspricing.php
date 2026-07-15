@@ -53,7 +53,8 @@ class TailoredProductsPricing extends Module
             && $this->registerHook('actionCombinationFormFormBuilderModifier')
             && $this->registerHook('actionCombinationFormFormDataProviderData')
             && $this->registerHook('actionAfterUpdateCombinationFormFormHandler')
-            && $this->registerHook('displayProductCustomization');
+            && $this->registerHook('displayProductCustomization')
+            && $this->registerHook('actionFrontControllerSetMedia');
     }
 
     public function uninstall()
@@ -159,6 +160,19 @@ class TailoredProductsPricing extends Module
         $this->context->smarty->assign($data);
 
         return $this->display(__FILE__, 'product-customization.tpl');
+    }
+
+    public function hookActionFrontControllerSetMedia(): void
+    {
+        if ('product' !== $this->context->controller->php_self) {
+            return;
+        }
+
+        $this->context->controller->registerStylesheet(
+            'tailoredproductspricing-product-customization',
+            'modules/' . $this->name . '/views/css/product-customization.css',
+            ['media' => 'all', 'priority' => 200]
+        );
     }
 
     // -------------------------------------------------------------------------
