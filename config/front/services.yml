@@ -7,6 +7,9 @@ services:
     PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider: ~
         # autowires ProductConfigRepository by type
 
+    PrestaShop\Module\TailoredProductsPricing\Service\DimensionPriceFormula: ~
+        # pure arithmetic service, no dependencies
+
     PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
         class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
