@@ -3,6 +3,7 @@
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider;
 use PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager;
 
@@ -157,6 +158,8 @@ class TailoredProductsPricing extends Module
             return '';
         }
 
+        $data['ajaxUrl'] = $this->context->link->getModuleLink($this->name, 'ajax');
+
         $this->context->smarty->assign($data);
 
         return $this->display(__FILE__, 'product-customization.tpl');
@@ -168,10 +171,21 @@ class TailoredProductsPricing extends Module
             return;
         }
 
+        $idProduct = (int) Tools::getValue('id_product');
+        if ($idProduct <= 0 || $this->get(ProductConfigRepository::class)->findByProductId($idProduct) === null) {
+            return;
+        }
+
         $this->context->controller->registerStylesheet(
             'tailoredproductspricing-product-customization',
             'modules/' . $this->name . '/views/css/product-customization.css',
             ['media' => 'all', 'priority' => 200]
+        );
+
+        $this->context->controller->registerJavascript(
+            'tailoredproductspricing-dimensions-price',
+            'modules/' . $this->name . '/views/js/dimensions-price.js',
+            ['position' => 'bottom', 'priority' => 200]
         );
     }
 

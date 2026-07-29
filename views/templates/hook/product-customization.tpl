@@ -1,9 +1,8 @@
-{*
- * Module-owned front-office partial rendered via Module::display() from
- * hookDisplayProductCustomization. Display-only: two number inputs (width,
- * height), no <form>, no submit control, no JS/CSS this iteration.
- *}
-<div id="tpp-dimensions-form" class="tpp-dimensions-form">
+<div
+    id="tpp-dimensions-form"
+    class="tpp-dimensions-form"
+    data-ajax-url="{$ajaxUrl|escape:'html'}"
+>
     <fieldset class="tpp-dimensions">
         <div class="tpp-dimensions-label">
             <label class="form-label">
@@ -20,8 +19,8 @@
                 name="tpp_width"
                 class="form-control"
                 step="{$step|escape:'html'}"
-                {if $minWidth !== null && $minWidth !== ''} min="{$minWidth|floatval}"{/if}
-                {if $maxWidth !== null && $maxWidth !== ''} max="{$maxWidth|floatval}"{/if}
+                min="{$minWidth|floatval}"
+                max="{$maxWidth|floatval}"
             >
         </div>
         <div class="form-group tpp-dimension-field">
@@ -34,10 +33,17 @@
                 name="tpp_height"
                 class="form-control"
                 step="{$step|escape:'html'}"
-                {if $minHeight !== null && $minHeight !== ''} min="{$minHeight|floatval}"{/if}
-                {if $maxHeight !== null && $maxHeight !== ''} max="{$maxHeight|floatval}"{/if}
+                min="{$minHeight|floatval}"
+                max="{$maxHeight|floatval}"
             >
-        </div>    
+        </div>
     </fieldset>
 
+    <div class="tpp-price-preview" data-state="idle">
+        <span class="tpp-price-preview-label">
+            {l s='Price for these dimensions:' d='Modules.Tailoredproductspricing.Shop'}
+        </span>
+        <span class="tpp-price-preview-value" data-role="price"></span>
+        <div class="tpp-bounds-error" data-role="bounds-error"></div>
+    </div>
 </div>

@@ -24,3 +24,48 @@
 .tpp-dimension-field {
     flex: 1 1;
 }
+
+.tpp-dimension-error {
+    display: none;
+    color: var(--bs-danger, #dc3545);
+    font-size: 0.875em;
+}
+
+.tpp-dimension-field.tpp-dimension-field--error .tpp-dimension-error {
+    display: block;
+}
+
+.tpp-dimension-field.tpp-dimension-field--error input {
+    border-color: var(--bs-danger, #dc3545);
+}
+
+.tpp-price-preview {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.tpp-price-preview-value {
+    font-weight: 600;
+}
+
+.tpp-price-preview[data-state="updating"] .tpp-price-preview-value {
+    opacity: 0.6;
+}
+
+.tpp-price-preview[data-state="error"] .tpp-price-preview-value {
+    color: var(--bs-danger, #dc3545);
+}
+
+.tpp-bounds-error {
+    display: none;
+    flex-basis: 100%;
+    color: var(--bs-danger, #dc3545);
+    font-size: 0.875em;
+}
+
+.tpp-price-preview[data-state="error"] .tpp-bounds-error {
+    display: block;
+}
