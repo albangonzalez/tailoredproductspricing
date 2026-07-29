@@ -4,6 +4,7 @@ use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModif
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer;
 use PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider;
 use PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager;
 
@@ -55,7 +56,9 @@ class TailoredProductsPricing extends Module
             && $this->registerHook('actionCombinationFormFormDataProviderData')
             && $this->registerHook('actionAfterUpdateCombinationFormFormHandler')
             && $this->registerHook('displayProductCustomization')
-            && $this->registerHook('actionFrontControllerSetMedia');
+            && $this->registerHook('actionFrontControllerSetMedia')
+            && $this->registerHook('actionCartControllerInitAfter')
+        ;
     }
 
     public function uninstall()
@@ -188,6 +191,12 @@ class TailoredProductsPricing extends Module
             ['position' => 'bottom', 'priority' => 200]
         );
     }
+
+    // -------------------------------------------------------------------------
+    // Front office — add-to-cart interception (single-request customization)
+    // -------------------------------------------------------------------------
+
+    public function hookActionCartControllerInitAfter(array $params): void {}
 
     // -------------------------------------------------------------------------
     // Helpers
