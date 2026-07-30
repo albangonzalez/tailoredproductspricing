@@ -196,7 +196,10 @@ class TailoredProductsPricing extends Module
     // Front office — add-to-cart interception (single-request customization)
     // -------------------------------------------------------------------------
 
-    public function hookActionCartControllerInitAfter(array $params): void {}
+    public function hookActionCartControllerInitAfter(array $params): void
+    {
+        $this->get(AddToCartCustomizer::class)->handle($params['controller'], Context::getContext()->cart);
+    }
 
     // -------------------------------------------------------------------------
     // Helpers

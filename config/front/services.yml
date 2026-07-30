@@ -7,6 +7,13 @@ services:
     PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider: ~
         # autowires ProductConfigRepository by type
 
+    PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer: ~
+        # autowires ProductConfigRepository and CustomizationFieldIdsResolver by type
+
+    PrestaShop\Module\TailoredProductsPricing\Adapter\CustomizationFieldIdsResolver:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
     PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
         class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
