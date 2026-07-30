@@ -59,6 +59,28 @@ class TppProductConfig
      */
     private $unit = 'cm';
 
+    /**
+     * Id of the module-provisioned "Width" `customization_field` row
+     * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldProvisioner}).
+     * Null when the module is enabled but provisioning has not (yet)
+     * recorded an id, or after deprovisioning.
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_customization_field_width", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idCustomizationFieldWidth;
+
+    /**
+     * Id of the module-provisioned "Height" `customization_field` row.
+     * See {@see self::$idCustomizationFieldWidth}.
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_customization_field_height", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idCustomizationFieldHeight;
+
     public function __construct(int $idProduct)
     {
         $this->idProduct = $idProduct;
@@ -125,6 +147,30 @@ class TppProductConfig
     public function setUnit(string $unit): self
     {
         $this->unit = $unit;
+
+        return $this;
+    }
+
+    public function getIdCustomizationFieldWidth(): ?int
+    {
+        return $this->idCustomizationFieldWidth;
+    }
+
+    public function setIdCustomizationFieldWidth(?int $idCustomizationFieldWidth): self
+    {
+        $this->idCustomizationFieldWidth = $idCustomizationFieldWidth;
+
+        return $this;
+    }
+
+    public function getIdCustomizationFieldHeight(): ?int
+    {
+        return $this->idCustomizationFieldHeight;
+    }
+
+    public function setIdCustomizationFieldHeight(?int $idCustomizationFieldHeight): self
+    {
+        $this->idCustomizationFieldHeight = $idCustomizationFieldHeight;
 
         return $this;
     }

@@ -18,6 +18,11 @@ services:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
+    PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldProvisioner:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+            $translator: '@translator'
+
     # Repositories
     PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
         class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository

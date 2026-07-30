@@ -19,7 +19,8 @@ final class ProductConfigManager
     private const DEFAULT_UNIT = 'cm';
 
     public function __construct(
-        private readonly ProductConfigRepository $repository
+        private readonly ProductConfigRepository $repository,
+        private readonly CustomizationFieldProvisioner $customizationFieldProvisioner
     ) {
     }
 
@@ -54,6 +55,10 @@ final class ProductConfigManager
         $enabled = (bool) ($tppSettings['tpp_enabled'] ?? false);
 
         if (!$enabled) {
+            // Deprovision the module's customization fields (and clear the
+            // stored ids) before the row itself is removed, so the
+            // provisioner can still resolve which fields belong to it.
+            $this->customizationFieldProvisioner->deprovision($idProduct);
             $this->repository->removeByProductId($idProduct);
 
             return;
@@ -72,7 +77,11 @@ final class ProductConfigManager
             ->setMaxHeight($this->nullableDecimal($tppSettings['tpp_max_height'] ?? null))
             ->setUnit($unit);
 
+        // Persist the base settings first so the `tpp_product_config` row
+        // exists for the provisioner to record the resolved field ids onto.
         $this->repository->save($config);
+
+        $this->customizationFieldProvisioner->provision($idProduct);
     }
 
     /**

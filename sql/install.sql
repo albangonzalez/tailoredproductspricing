@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS `PREFIX_tpp_product_config` (
   `min_height` decimal(10,2) unsigned DEFAULT NULL,
   `max_height` decimal(10,2) unsigned DEFAULT NULL,
   `unit` varchar(8) NOT NULL DEFAULT 'cm',
+  `id_customization_field_width` int(10) unsigned DEFAULT NULL,
+  `id_customization_field_height` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id_product`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4;
 
