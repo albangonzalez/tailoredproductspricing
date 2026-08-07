@@ -18,7 +18,7 @@ services:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
-    PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldProvisioner:
+    PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
             $translator: '@translator'

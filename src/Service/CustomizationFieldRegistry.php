@@ -27,7 +27,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * Triggered from the existing `actionAfterUpdateProductFormHandler` hook via
  * `ProductConfigManager::saveFromFormData()` — no new hook.
  */
-final class CustomizationFieldProvisioner
+final class CustomizationFieldRegistry
 {
     private const TYPE_TEXTFIELD = 1; // Product::CUSTOMIZE_TEXTFIELD
     private const TRANSLATION_DOMAIN = 'Modules.Tailoredproductspricing.Admin';
@@ -47,7 +47,7 @@ final class CustomizationFieldProvisioner
      * Also sets `product.customizable = 1` (never `2`) and keeps
      * `text_fields` / `uploadable_files` counters consistent.
      */
-    public function provision(int $idProduct): CustomizationFieldIds
+    public function register(int $idProduct): CustomizationFieldIds
     {
         [$storedWidthId, $storedHeightId] = $this->getStoredFieldIds($idProduct);
 
@@ -77,7 +77,7 @@ final class CustomizationFieldProvisioner
      * independent, non-module customization field the merchant added
      * separately must survive untouched (6-F).
      */
-    public function deprovision(int $idProduct): void
+    public function unregister(int $idProduct): void
     {
         [$storedWidthId, $storedHeightId] = $this->getStoredFieldIds($idProduct);
 

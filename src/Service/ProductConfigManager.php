@@ -20,7 +20,7 @@ final class ProductConfigManager
 
     public function __construct(
         private readonly ProductConfigRepository $repository,
-        private readonly CustomizationFieldProvisioner $customizationFieldProvisioner
+        private readonly CustomizationFieldRegistry $customizationFieldRegistry
     ) {
     }
 
@@ -55,10 +55,10 @@ final class ProductConfigManager
         $enabled = (bool) ($tppSettings['tpp_enabled'] ?? false);
 
         if (!$enabled) {
-            // Deprovision the module's customization fields (and clear the
+            // Unregister the module's customization fields (and clear the
             // stored ids) before the row itself is removed, so the
-            // provisioner can still resolve which fields belong to it.
-            $this->customizationFieldProvisioner->deprovision($idProduct);
+            // registry can still resolve which fields belong to it.
+            $this->customizationFieldRegistry->unregister($idProduct);
             $this->repository->removeByProductId($idProduct);
 
             return;
@@ -78,10 +78,10 @@ final class ProductConfigManager
             ->setUnit($unit);
 
         // Persist the base settings first so the `tpp_product_config` row
-        // exists for the provisioner to record the resolved field ids onto.
+        // exists for the registry to record the resolved field ids onto.
         $this->repository->save($config);
 
-        $this->customizationFieldProvisioner->provision($idProduct);
+        $this->customizationFieldRegistry->register($idProduct);
     }
 
     /**
