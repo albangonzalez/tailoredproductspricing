@@ -2,6 +2,7 @@
 
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier;
 use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
+use PrestaShop\Module\TailoredProductsPricing\Install\Installer;
 use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer;
@@ -16,9 +17,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class TailoredProductsPricing extends Module
 {
-    const INSTALL_SQL_FILE = 'sql/install.sql';
-    const UNINSTALL_SQL_FILE = 'sql/uninstall.sql';
-
     const FORM_THEME = '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig';
 
     public function __construct()
@@ -44,49 +42,18 @@ class TailoredProductsPricing extends Module
 
     public function install()
     {
-        if (!$this->runSqlFile(self::INSTALL_SQL_FILE)) {
+        if (!parent::install()) {
             return false;
         }
 
-        return parent::install()
-            && $this->registerHook('actionProductFormBuilderModifier')
-            && $this->registerHook('actionProductFormDataProviderData')
-            && $this->registerHook('actionAfterUpdateProductFormHandler')
-            && $this->registerHook('actionCombinationFormFormBuilderModifier')
-            && $this->registerHook('actionCombinationFormFormDataProviderData')
-            && $this->registerHook('actionAfterUpdateCombinationFormFormHandler')
-            && $this->registerHook('displayProductCustomization')
-            && $this->registerHook('actionFrontControllerSetMedia')
-            && $this->registerHook('actionCartControllerInitAfter')
-        ;
+        return (new Installer())->install($this);
     }
 
     public function uninstall()
     {
-        $this->runSqlFile(self::UNINSTALL_SQL_FILE);
+        (new Installer())->uninstall();
 
         return parent::uninstall();
-    }
-
-    private function runSqlFile(string $file): bool
-    {
-        $path = dirname(__FILE__) . '/' . $file;
-        if (!file_exists($path)) {
-            return false;
-        }
-
-        $sql = file_get_contents($path);
-        $sql = str_replace(['PREFIX_', 'ENGINE_TYPE'], [_DB_PREFIX_, _MYSQL_ENGINE_], $sql);
-        $queries = preg_split("/;\s*[\r\n]+/", trim($sql));
-
-        foreach ($queries as $query) {
-            $query = trim($query);
-            if ($query && !Db::getInstance()->execute($query)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     // -------------------------------------------------------------------------
