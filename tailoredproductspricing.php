@@ -119,7 +119,7 @@ class TailoredProductsPricing extends Module
     // Front office — product page dimensions form
     // -------------------------------------------------------------------------
 
-    public function hookDisplayProductCustomization(array $params): string
+    public function hookDisplayProductCustomizationTop(array $params): string
     {
         $idProduct = (int) ($params['product']['id'] ?? $params['product']['id_product'] ?? 0);
 
@@ -132,7 +132,12 @@ class TailoredProductsPricing extends Module
 
         $this->context->smarty->assign($data);
 
-        return $this->display(__FILE__, 'product-customization.tpl');
+        return $this->display(__FILE__, 'product-dimensions.tpl');
+    }
+
+    public function hookDisplayProductCustomizationBottom(array $params): string
+    {
+        return $this->display(__FILE__, 'product-choices.tpl');
     }
 
     public function hookActionFrontControllerSetMedia(): void

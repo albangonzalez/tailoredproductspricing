@@ -18,7 +18,8 @@ final class Installer
         'actionCombinationFormFormBuilderModifier',
         'actionCombinationFormFormDataProviderData',
         'actionAfterUpdateCombinationFormFormHandler',
-        'displayProductCustomization',
+        'displayProductCustomizationTop',
+        'displayProductCustomizationBottom',
         'actionFrontControllerSetMedia',
         'actionCartControllerInitAfter',
     ];
