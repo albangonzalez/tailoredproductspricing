@@ -11,7 +11,7 @@
         </label>
 
         <input type="radio" class="btn-check" name="tpp_cord_side"
-               id="tpp_cord_side_right_{$idProduct|intval}" value="right" autocomplete="off">
+               id="tpp_cord_side_right_{$idProduct|intval}" value="right" autocomplete="off" checked>
         <label class="btn btn-outline-primary" for="tpp_cord_side_right_{$idProduct|intval}">
             {l s='Derecho' d='Modules.Tailoredproductspricing.Shop'}
         </label>
