@@ -7,7 +7,6 @@ namespace PrestaShop\Module\TailoredProductsPricing\Service;
 use Cart;
 use Context;
 use FrontController;
-use PrestaShop\Module\TailoredProductsPricing\Adapter\CustomizationFieldIdsResolver;
 use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
 use Product;
 use Tools;
@@ -28,8 +27,7 @@ use Validate;
 class AddToCartCustomizer
 {
     public function __construct(
-        private readonly ProductConfigRepository $productConfigRepository,
-        private readonly CustomizationFieldIdsResolver $customizationFieldIdsResolver
+        private readonly ProductConfigRepository $productConfigRepository
     ) {
     }
 
@@ -55,15 +53,14 @@ class AddToCartCustomizer
 
         $width = (string) Tools::getValue('tpp_width');
         $height = (string) Tools::getValue('tpp_height');
-        if ($width === '' || $height === '') {
-            return;
-        }
+        $cordSide = (string) Tools::getValue('tpp_cord_side');
 
-        $fieldIds = $this->customizationFieldIdsResolver->resolve($idProduct);
-        if ($fieldIds === null) {
+        $hasDimensions = $width !== '' && $height !== '';
+        $hasCordSide = $cordSide !== '' && $config->getIdCustomizationFieldCordSide() !== null;
+
+        if (!$hasDimensions && !$hasCordSide) {
             return;
         }
-        [$widthFieldId, $heightFieldId] = $fieldIds;
 
         if (!$cart->id) {
             $cart->add();
@@ -73,8 +70,16 @@ class AddToCartCustomizer
             Context::getContext()->cookie->id_cart = (int) $cart->id;
         }
 
-        $cart->addTextFieldToProduct($idProduct, $widthFieldId, Product::CUSTOMIZE_TEXTFIELD, $width, true);
-        $idCustomization = $cart->addTextFieldToProduct($idProduct, $heightFieldId, Product::CUSTOMIZE_TEXTFIELD, $height, true);
+        $idCustomization = false;
+
+        if ($hasDimensions) {
+            $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldWidth(), Product::CUSTOMIZE_TEXTFIELD, $width, true);
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldHeight(), Product::CUSTOMIZE_TEXTFIELD, $height, true);
+        }
+
+        if ($hasCordSide) {
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldCordSide(), Product::CUSTOMIZE_TEXTFIELD, $cordSide, true);
+        }
 
         if ($idCustomization === false) {
             return;

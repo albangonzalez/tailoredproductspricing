@@ -8,11 +8,7 @@ services:
         # autowires ProductConfigRepository by type
 
     PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer: ~
-        # autowires ProductConfigRepository and CustomizationFieldIdsResolver by type
-
-    PrestaShop\Module\TailoredProductsPricing\Adapter\CustomizationFieldIdsResolver:
-        arguments:
-            $connection: '@doctrine.dbal.default_connection'
+        # autowires ProductConfigRepository by type
 
     PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
         class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository

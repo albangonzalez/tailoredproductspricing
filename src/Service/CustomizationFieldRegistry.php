@@ -39,20 +39,21 @@ final class CustomizationFieldRegistry
     }
 
     /**
-     * Ensures the two `is_module=1` Width/Height fields exist for
-     * $idProduct and returns their ids. Idempotent: reuses the ids already
-     * stored on `tpp_product_config` when the referenced rows still exist
-     * and are live; otherwise (re)provisions a fresh pair.
+     * Ensures the three `is_module=1` Width/Height/Cord-side fields exist
+     * for $idProduct. Idempotent: reuses the ids already stored on
+     * `tpp_product_config` when the referenced rows still exist and are
+     * live; otherwise (re)provisions a fresh field.
      *
      * Also sets `product.customizable = 1` (never `2`) and keeps
      * `text_fields` / `uploadable_files` counters consistent.
      */
-    public function register(int $idProduct): CustomizationFieldIds
+    public function register(int $idProduct): void
     {
-        [$storedWidthId, $storedHeightId] = $this->getStoredFieldIds($idProduct);
+        [$storedWidthId, $storedHeightId, $storedCordSideId] = $this->getStoredFieldIds($idProduct);
 
         $widthId = $this->resolveLiveFieldId($storedWidthId, $idProduct);
         $heightId = $this->resolveLiveFieldId($storedHeightId, $idProduct);
+        $cordSideId = $this->resolveLiveFieldId($storedCordSideId, $idProduct);
 
         if ($widthId === null) {
             $widthId = $this->createField($idProduct, 'Width');
@@ -62,15 +63,17 @@ final class CustomizationFieldRegistry
             $heightId = $this->createField($idProduct, 'Height');
         }
 
-        $this->setStoredFieldIds($idProduct, $widthId, $heightId);
+        if ($cordSideId === null) {
+            $cordSideId = $this->createField($idProduct, 'Cord side');
+        }
+
+        $this->setStoredFieldIds($idProduct, $widthId, $heightId, $cordSideId);
         $this->setCustomizable($idProduct, 1);
         $this->refreshCustomizationCounters($idProduct);
-
-        return new CustomizationFieldIds($widthId, $heightId);
     }
 
     /**
-     * Soft-deletes (`is_deleted = 1`) the module's two fields — never
+     * Soft-deletes (`is_deleted = 1`) the module's three fields — never
      * hard-delete (6-C) — clears the stored id references, and recomputes
      * `product.customizable` from whatever live (non-deleted) customization
      * fields remain for the product, rather than blindly zeroing it: an
@@ -79,9 +82,9 @@ final class CustomizationFieldRegistry
      */
     public function unregister(int $idProduct): void
     {
-        [$storedWidthId, $storedHeightId] = $this->getStoredFieldIds($idProduct);
+        [$storedWidthId, $storedHeightId, $storedCordSideId] = $this->getStoredFieldIds($idProduct);
 
-        $idsToSoftDelete = array_values(array_filter([$storedWidthId, $storedHeightId]));
+        $idsToSoftDelete = array_values(array_filter([$storedWidthId, $storedHeightId, $storedCordSideId]));
 
         if ($idsToSoftDelete !== []) {
             $this->connection->createQueryBuilder()
@@ -95,18 +98,18 @@ final class CustomizationFieldRegistry
                 ->executeStatement();
         }
 
-        $this->setStoredFieldIds($idProduct, null, null);
+        $this->setStoredFieldIds($idProduct, null, null, null);
         $this->recomputeCustomizableFromRemainingFields($idProduct);
         $this->refreshCustomizationCounters($idProduct);
     }
 
     /**
-     * @return array{0: int|null, 1: int|null}
+     * @return array{0: int|null, 1: int|null, 2: int|null}
      */
     private function getStoredFieldIds(int $idProduct): array
     {
         $row = $this->connection->createQueryBuilder()
-            ->select('id_customization_field_width', 'id_customization_field_height')
+            ->select('id_customization_field_width', 'id_customization_field_height', 'id_customization_field_cord_side')
             ->from(_DB_PREFIX_ . 'tpp_product_config')
             ->where('id_product = :idProduct')
             ->setParameter('idProduct', $idProduct)
@@ -114,22 +117,24 @@ final class CustomizationFieldRegistry
             ->fetchAssociative();
 
         if ($row === false) {
-            return [null, null];
+            return [null, null, null];
         }
 
         return [
             $row['id_customization_field_width'] !== null ? (int) $row['id_customization_field_width'] : null,
             $row['id_customization_field_height'] !== null ? (int) $row['id_customization_field_height'] : null,
+            $row['id_customization_field_cord_side'] !== null ? (int) $row['id_customization_field_cord_side'] : null,
         ];
     }
 
-    private function setStoredFieldIds(int $idProduct, ?int $widthId, ?int $heightId): void
+    private function setStoredFieldIds(int $idProduct, ?int $widthId, ?int $heightId, ?int $cordSideId): void
     {
         $this->connection->update(
             _DB_PREFIX_ . 'tpp_product_config',
             [
                 'id_customization_field_width' => $widthId,
                 'id_customization_field_height' => $heightId,
+                'id_customization_field_cord_side' => $cordSideId,
             ],
             ['id_product' => $idProduct]
         );

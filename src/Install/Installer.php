@@ -91,7 +91,7 @@ final class Installer
              INNER JOIN `' . $prefix . 'tpp_product_config` c ON cf.`id_product` = c.`id_product`
              SET cf.`is_deleted` = 1
              WHERE cf.`is_deleted` = 0
-             AND cf.`id_customization_field` IN (c.`id_customization_field_width`, c.`id_customization_field_height`)'
+             AND cf.`id_customization_field` IN (c.`id_customization_field_width`, c.`id_customization_field_height`, c.`id_customization_field_cord_side`)'
         );
 
         if (!$softDeleted) {

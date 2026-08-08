@@ -69,3 +69,19 @@
 .tpp-price-preview[data-state="error"] .tpp-bounds-error {
     display: block;
 }
+
+.tpp-choices {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.tpp-choices__legend {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.tpp-choices__group {
+    display: flex;
+    flex-wrap: wrap;
+}

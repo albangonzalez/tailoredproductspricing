@@ -137,6 +137,18 @@ class TailoredProductsPricing extends Module
 
     public function hookDisplayProductCustomizationBottom(array $params): string
     {
+        $idProduct = (int) ($params['product']['id'] ?? $params['product']['id_product'] ?? 0);
+        if ($idProduct <= 0) {
+            return '';
+        }
+
+        $config = $this->get(ProductConfigRepository::class)->findByProductId($idProduct);
+        if ($config === null) {
+            return '';
+        }
+
+        $this->context->smarty->assign('idProduct', $idProduct);
+
         return $this->display(__FILE__, 'product-choices.tpl');
     }
 

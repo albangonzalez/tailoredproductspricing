@@ -61,7 +61,7 @@ class TppProductConfig
 
     /**
      * Id of the module-provisioned "Width" `customization_field` row
-     * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldProvisioner}).
+     * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry}).
      * Null when the module is enabled but provisioning has not (yet)
      * recorded an id, or after deprovisioning.
      *
@@ -80,6 +80,16 @@ class TppProductConfig
      * @ORM\Column(name="id_customization_field_height", type="integer", options={"unsigned"=true}, nullable=true)
      */
     private $idCustomizationFieldHeight;
+
+    /**
+     * Id of the module-provisioned "Cord side" `customization_field` row.
+     * See {@see self::$idCustomizationFieldWidth}.
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_customization_field_cord_side", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idCustomizationFieldCordSide;
 
     public function __construct(int $idProduct)
     {
@@ -171,6 +181,18 @@ class TppProductConfig
     public function setIdCustomizationFieldHeight(?int $idCustomizationFieldHeight): self
     {
         $this->idCustomizationFieldHeight = $idCustomizationFieldHeight;
+
+        return $this;
+    }
+
+    public function getIdCustomizationFieldCordSide(): ?int
+    {
+        return $this->idCustomizationFieldCordSide;
+    }
+
+    public function setIdCustomizationFieldCordSide(?int $idCustomizationFieldCordSide): self
+    {
+        $this->idCustomizationFieldCordSide = $idCustomizationFieldCordSide;
 
         return $this;
     }

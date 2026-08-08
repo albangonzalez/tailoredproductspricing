@@ -21,6 +21,7 @@ final class SqlQueries
               `unit` varchar(8) NOT NULL DEFAULT \'cm\',
               `id_customization_field_width` int(10) unsigned DEFAULT NULL,
               `id_customization_field_height` int(10) unsigned DEFAULT NULL,
+              `id_customization_field_cord_side` int(10) unsigned DEFAULT NULL,
               PRIMARY KEY (`id_product`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 
