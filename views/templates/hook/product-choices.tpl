@@ -39,3 +39,26 @@
         </div>
     </fieldset>
 {/if}
+
+{if $mechanismColorOptions|@count}
+    <fieldset class="tpp-choices">
+        <legend class="form-label tpp-choices__legend">
+            {l s='Mechanism & cord color' d='Modules.Tailoredproductspricing.Shop'}
+        </legend>
+
+        <div class="tpp-choices__group tpp-swatches" role="group">
+            {foreach from=$mechanismColorOptions item=option name=colors}
+                <input type="radio" class="tpp-swatch-input" name="tpp_mechanism_color"
+                       id="tpp_mechanism_color_{$option.id|intval}_{$idProduct|intval}"
+                       value="{$option.id|intval}" autocomplete="off"
+                       {if $smarty.foreach.colors.first} checked{/if}>
+                <label class="tpp-swatch{if !$option.color} tpp-swatch--unknown{/if}"
+                       for="tpp_mechanism_color_{$option.id|intval}_{$idProduct|intval}"
+                       title="{$option.name|escape:'htmlall':'UTF-8'}"
+                       {if $option.color} style="--tpp-swatch-color: {$option.color|escape:'htmlall':'UTF-8'};"{/if}>
+                    <span class="visually-hidden">{$option.name|escape:'htmlall':'UTF-8'}</span>
+                </label>
+            {/foreach}
+        </div>
+    </fieldset>
+{/if}

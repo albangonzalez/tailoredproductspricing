@@ -82,11 +82,22 @@ class TailoredProductsSettingsType extends AbstractType
                 'row_attr' => ['class' => self::CASSETTE_FIELD_CLASS],
                 'translation_domain' => self::DOMAIN,
                 'form_theme' => self::FORM_THEME,
+            ])
+            ->add('tpp_mechanism_color_group', ChoiceType::class, [
+                'label' => 'Mechanism & cord color options',
+                'help' => 'Pick an existing color attribute group (Catalog > Attributes & Features). Leave empty to not offer this choice. This choice does not affect the price.',
+                'required' => false,
+                'choices' => $options['color_attribute_groups'],
+                'placeholder' => 'Not offered',
+                'row_attr' => ['class' => self::FIELD_CLASS],
+                'translation_domain' => self::DOMAIN,
+                'form_theme' => self::FORM_THEME,
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['label' => false]);
+        $resolver->setDefaults(['label' => false, 'color_attribute_groups' => []]);
+        $resolver->setAllowedTypes('color_attribute_groups', 'array');
     }
 }

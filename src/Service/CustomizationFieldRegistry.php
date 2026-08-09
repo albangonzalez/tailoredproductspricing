@@ -8,10 +8,10 @@ use Doctrine\DBAL\Connection;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Owns the lifecycle of the two native `customization_field` rows (Width,
- * Height) that carry a tailored product's entered dimensions (spec
- * Iteration 6, D1/6-E), so the merchant never touches PrestaShop's own
- * Customization tab.
+ * Owns the lifecycle of the native `customization_field` rows (Width,
+ * Height, Cord side, Cassette, Mechanism color) that carry a tailored
+ * product's entered choices (spec Iteration 6, D1/6-E), so the merchant
+ * never touches PrestaShop's own Customization tab.
  *
  * Deliberately a **dedicated DBAL adapter** — parameterized `Connection`
  * writes to core-owned tables (`customization_field`, `customization_field_lang`,
@@ -32,6 +32,19 @@ final class CustomizationFieldRegistry
     private const TYPE_TEXTFIELD = 1; // Product::CUSTOMIZE_TEXTFIELD
     private const TRANSLATION_DOMAIN = 'Modules.Tailoredproductspricing.Admin';
 
+    /**
+     * Slug => `tpp_product_config` column holding the field id. Keyed map
+     * instead of a positional tuple: a five-element positional array plus a
+     * five-argument setter is a silent-transposition bug waiting to happen.
+     */
+    private const FIELD_COLUMNS = [
+        'width' => 'id_customization_field_width',
+        'height' => 'id_customization_field_height',
+        'cord_side' => 'id_customization_field_cord_side',
+        'cassette' => 'id_customization_field_cassette',
+        'mechanism_color' => 'id_customization_field_mechanism_color',
+    ];
+
     public function __construct(
         private readonly Connection $connection,
         private readonly TranslatorInterface $translator,
@@ -40,50 +53,61 @@ final class CustomizationFieldRegistry
 
     /**
      * Ensures the three unconditional `is_module=1` Width/Height/Cord-side
-     * fields exist for $idProduct, plus a fourth, optional Cassette field
-     * gated on $withCassette. Idempotent: reuses the ids already stored on
+     * fields exist for $idProduct, plus a fourth field (Cassette) gated on
+     * $withCassette and a fifth (Mechanism color) gated on
+     * $withMechanismColor. Idempotent: reuses the ids already stored on
      * `tpp_product_config` when the referenced rows still exist and are
-     * live; otherwise (re)provisions a fresh field. $withCassette === false
-     * soft-deletes any stored cassette field instead.
+     * live; otherwise (re)provisions a fresh field. A false gate soft-deletes
+     * any stored field for that slot instead.
      *
      * Also sets `product.customizable = 1` (never `2`) and keeps
      * `text_fields` / `uploadable_files` counters consistent.
      */
-    public function register(int $idProduct, bool $withCassette): void
+    public function register(int $idProduct, bool $withCassette, bool $withMechanismColor): void
     {
-        [$storedWidthId, $storedHeightId, $storedCordSideId, $storedCassetteId] = $this->getStoredFieldIds($idProduct);
+        $stored = $this->getStoredFieldIds($idProduct);
 
-        $widthId = $this->resolveLiveFieldId($storedWidthId, $idProduct);
-        $heightId = $this->resolveLiveFieldId($storedHeightId, $idProduct);
-        $cordSideId = $this->resolveLiveFieldId($storedCordSideId, $idProduct);
+        $ids = [
+            'width' => $this->resolveLiveFieldId($stored['width'], $idProduct),
+            'height' => $this->resolveLiveFieldId($stored['height'], $idProduct),
+            'cord_side' => $this->resolveLiveFieldId($stored['cord_side'], $idProduct),
+        ];
 
-        if ($widthId === null) {
-            $widthId = $this->createField($idProduct, 'Width');
+        if ($ids['width'] === null) {
+            $ids['width'] = $this->createField($idProduct, 'Width');
         }
 
-        if ($heightId === null) {
-            $heightId = $this->createField($idProduct, 'Height');
+        if ($ids['height'] === null) {
+            $ids['height'] = $this->createField($idProduct, 'Height');
         }
 
-        if ($cordSideId === null) {
-            $cordSideId = $this->createField($idProduct, 'Cord side');
+        if ($ids['cord_side'] === null) {
+            $ids['cord_side'] = $this->createField($idProduct, 'Cord side');
         }
 
         if ($withCassette) {
-            $cassetteId = $this->resolveLiveFieldId($storedCassetteId, $idProduct)
+            $ids['cassette'] = $this->resolveLiveFieldId($stored['cassette'], $idProduct)
                 ?? $this->createField($idProduct, 'Cassette');
         } else {
-            $this->softDeleteFields($idProduct, array_values(array_filter([$storedCassetteId])));
-            $cassetteId = null;
+            $this->softDeleteFields($idProduct, array_values(array_filter([$stored['cassette']])));
+            $ids['cassette'] = null;
         }
 
-        $this->setStoredFieldIds($idProduct, $widthId, $heightId, $cordSideId, $cassetteId);
+        if ($withMechanismColor) {
+            $ids['mechanism_color'] = $this->resolveLiveFieldId($stored['mechanism_color'], $idProduct)
+                ?? $this->createField($idProduct, 'Mechanism color');
+        } else {
+            $this->softDeleteFields($idProduct, array_values(array_filter([$stored['mechanism_color']])));
+            $ids['mechanism_color'] = null;
+        }
+
+        $this->setStoredFieldIds($idProduct, $ids);
         $this->setCustomizable($idProduct, 1);
         $this->refreshCustomizationCounters($idProduct);
     }
 
     /**
-     * Soft-deletes (`is_deleted = 1`) the module's four fields — never
+     * Soft-deletes (`is_deleted = 1`) the module's fields — never
      * hard-delete (6-C) — clears the stored id references, and recomputes
      * `product.customizable` from whatever live (non-deleted) customization
      * fields remain for the product, rather than blindly zeroing it: an
@@ -92,30 +116,22 @@ final class CustomizationFieldRegistry
      */
     public function unregister(int $idProduct): void
     {
-        [$storedWidthId, $storedHeightId, $storedCordSideId, $storedCassetteId] = $this->getStoredFieldIds($idProduct);
+        $stored = $this->getStoredFieldIds($idProduct);
 
-        $this->softDeleteFields(
-            $idProduct,
-            array_values(array_filter([$storedWidthId, $storedHeightId, $storedCordSideId, $storedCassetteId]))
-        );
+        $this->softDeleteFields($idProduct, array_values(array_filter($stored)));
 
-        $this->setStoredFieldIds($idProduct, null, null, null, null);
+        $this->setStoredFieldIds($idProduct, array_fill_keys(array_keys(self::FIELD_COLUMNS), null));
         $this->recomputeCustomizableFromRemainingFields($idProduct);
         $this->refreshCustomizationCounters($idProduct);
     }
 
     /**
-     * @return array{0: int|null, 1: int|null, 2: int|null, 3: int|null}
+     * @return array<string, int|null> keyed by {@see self::FIELD_COLUMNS} slug
      */
     private function getStoredFieldIds(int $idProduct): array
     {
         $row = $this->connection->createQueryBuilder()
-            ->select(
-                'id_customization_field_width',
-                'id_customization_field_height',
-                'id_customization_field_cord_side',
-                'id_customization_field_cassette'
-            )
+            ->select(...array_values(self::FIELD_COLUMNS))
             ->from(_DB_PREFIX_ . 'tpp_product_config')
             ->where('id_product = :idProduct')
             ->setParameter('idProduct', $idProduct)
@@ -123,29 +139,28 @@ final class CustomizationFieldRegistry
             ->fetchAssociative();
 
         if ($row === false) {
-            return [null, null, null, null];
+            return array_fill_keys(array_keys(self::FIELD_COLUMNS), null);
         }
 
-        return [
-            $row['id_customization_field_width'] !== null ? (int) $row['id_customization_field_width'] : null,
-            $row['id_customization_field_height'] !== null ? (int) $row['id_customization_field_height'] : null,
-            $row['id_customization_field_cord_side'] !== null ? (int) $row['id_customization_field_cord_side'] : null,
-            $row['id_customization_field_cassette'] !== null ? (int) $row['id_customization_field_cassette'] : null,
-        ];
+        $ids = [];
+        foreach (self::FIELD_COLUMNS as $slug => $column) {
+            $ids[$slug] = $row[$column] !== null ? (int) $row[$column] : null;
+        }
+
+        return $ids;
     }
 
-    private function setStoredFieldIds(int $idProduct, ?int $widthId, ?int $heightId, ?int $cordSideId, ?int $cassetteId): void
+    /**
+     * @param array<string, int|null> $ids keyed by {@see self::FIELD_COLUMNS} slug
+     */
+    private function setStoredFieldIds(int $idProduct, array $ids): void
     {
-        $this->connection->update(
-            _DB_PREFIX_ . 'tpp_product_config',
-            [
-                'id_customization_field_width' => $widthId,
-                'id_customization_field_height' => $heightId,
-                'id_customization_field_cord_side' => $cordSideId,
-                'id_customization_field_cassette' => $cassetteId,
-            ],
-            ['id_product' => $idProduct]
-        );
+        $data = [];
+        foreach (self::FIELD_COLUMNS as $slug => $column) {
+            $data[$column] = $ids[$slug] ?? null;
+        }
+
+        $this->connection->update(_DB_PREFIX_ . 'tpp_product_config', $data, ['id_product' => $idProduct]);
     }
 
     /**

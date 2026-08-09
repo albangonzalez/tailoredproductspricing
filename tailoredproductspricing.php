@@ -140,7 +140,11 @@ class TailoredProductsPricing extends Module
     {
         $idProduct = (int) ($params['product']['id'] ?? $params['product']['id_product'] ?? 0);
 
-        $data = $this->get(ProductChoicesProvider::class)->getViewData($idProduct);
+        $data = $this->get(ProductChoicesProvider::class)->getViewData(
+            $idProduct,
+            (int) $this->context->language->id,
+            (int) $this->context->shop->id
+        );
         if ($data === null) {
             return '';
         }

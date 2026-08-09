@@ -24,6 +24,8 @@ final class SqlQueries
               `id_customization_field_cord_side` int(10) unsigned DEFAULT NULL,
               `cassette_price_per_meter` decimal(20,2) DEFAULT NULL,
               `id_customization_field_cassette` int(10) unsigned DEFAULT NULL,
+              `id_attribute_group_mechanism_color` int(10) unsigned DEFAULT NULL,
+              `id_customization_field_mechanism_color` int(10) unsigned DEFAULT NULL,
               PRIMARY KEY (`id_product`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 

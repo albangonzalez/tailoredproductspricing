@@ -71,6 +71,19 @@ class TppProductConfig
     private $cassettePricePerMeter;
 
     /**
+     * Id of the core `attribute_group` row (`group_type = 'color'`) whose
+     * attributes are offered as mechanism/cord color options for this product.
+     * Null means the choice is not offered — there is no separate enabled flag.
+     * The module only ever reads that group; it never creates or edits core
+     * attribute data, and there is deliberately no SQL FK (see the spec).
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_attribute_group_mechanism_color", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idAttributeGroupMechanismColor;
+
+    /**
      * Id of the module-provisioned "Width" `customization_field` row
      * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry}).
      * Null when the module is enabled but provisioning has not (yet)
@@ -114,6 +127,18 @@ class TppProductConfig
      * @ORM\Column(name="id_customization_field_cassette", type="integer", options={"unsigned"=true}, nullable=true)
      */
     private $idCustomizationFieldCassette;
+
+    /**
+     * Id of the module-provisioned "Mechanism color" `customization_field`
+     * row. Null whenever the mechanism-color choice is off for the product
+     * (i.e. whenever {@see self::$idAttributeGroupMechanismColor} is null).
+     * See {@see self::$idCustomizationFieldWidth}.
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_customization_field_mechanism_color", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idCustomizationFieldMechanismColor;
 
     public function __construct(int $idProduct)
     {
@@ -241,6 +266,30 @@ class TppProductConfig
     public function setIdCustomizationFieldCassette(?int $idCustomizationFieldCassette): self
     {
         $this->idCustomizationFieldCassette = $idCustomizationFieldCassette;
+
+        return $this;
+    }
+
+    public function getIdAttributeGroupMechanismColor(): ?int
+    {
+        return $this->idAttributeGroupMechanismColor;
+    }
+
+    public function setIdAttributeGroupMechanismColor(?int $idAttributeGroupMechanismColor): self
+    {
+        $this->idAttributeGroupMechanismColor = $idAttributeGroupMechanismColor;
+
+        return $this;
+    }
+
+    public function getIdCustomizationFieldMechanismColor(): ?int
+    {
+        return $this->idCustomizationFieldMechanismColor;
+    }
+
+    public function setIdCustomizationFieldMechanismColor(?int $idCustomizationFieldMechanismColor): self
+    {
+        $this->idCustomizationFieldMechanismColor = $idCustomizationFieldMechanismColor;
 
         return $this;
     }

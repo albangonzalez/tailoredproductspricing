@@ -4,6 +4,10 @@ services:
         autoconfigure: false
         public: true
 
+    PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
     PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider: ~
         # autowires ProductConfigRepository by type
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\TailoredProductsPricing\Form\Modifier;
 
+use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
 use PrestaShop\Module\TailoredProductsPricing\Form\Type\TailoredProductsSettingsType;
 use PrestaShopBundle\Form\FormBuilderModifier;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -18,7 +19,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 final class ProductFormModifier
 {
     public function __construct(
-        private readonly FormBuilderModifier $formBuilderModifier
+        private readonly FormBuilderModifier $formBuilderModifier,
+        private readonly ColorAttributeProvider $colorAttributeProvider,
+        private readonly int $contextLangId,
+        private readonly int $contextShopId
     ) {
     }
 
@@ -35,7 +39,22 @@ final class ProductFormModifier
             'references',
             'tpp_settings',
             TailoredProductsSettingsType::class,
-            []
+            ['color_attribute_groups' => $this->colorGroupChoices()]
         );
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function colorGroupChoices(): array
+    {
+        $choices = [];
+
+        foreach ($this->colorAttributeProvider->findColorGroups($this->contextLangId, $this->contextShopId) as $group) {
+            $label = $group['name'] !== '' ? $group['name'] : ('#' . $group['id']);
+            $choices[$label] = $group['id'];
+        }
+
+        return $choices;
     }
 }

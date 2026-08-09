@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\TailoredProductsPricing\Service;
 
+use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
 use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
 use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
 
@@ -20,7 +21,9 @@ final class ProductConfigManager
 
     public function __construct(
         private readonly ProductConfigRepository $repository,
-        private readonly CustomizationFieldRegistry $customizationFieldRegistry
+        private readonly CustomizationFieldRegistry $customizationFieldRegistry,
+        private readonly ColorAttributeProvider $colorAttributeProvider,
+        private readonly int $contextShopId
     ) {
     }
 
@@ -41,6 +44,7 @@ final class ProductConfigManager
             'tpp_max_height' => $config ? $config->getMaxHeight() : null,
             'tpp_cassette_enabled' => ($config && $config->getCassettePricePerMeter() !== null) ? 1 : 0,
             'tpp_cassette_price' => $config ? $config->getCassettePricePerMeter() : null,
+            'tpp_mechanism_color_group' => $config ? $config->getIdAttributeGroupMechanismColor() : null,
         ];
     }
 
@@ -78,7 +82,8 @@ final class ProductConfigManager
             ->setMinHeight($this->nullableDecimal($tppSettings['tpp_min_height'] ?? null))
             ->setMaxHeight($this->nullableDecimal($tppSettings['tpp_max_height'] ?? null))
             ->setUnit($unit)
-            ->setCassettePricePerMeter($this->cassettePrice($tppSettings));
+            ->setCassettePricePerMeter($this->cassettePrice($tppSettings))
+            ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings));
 
         // Persist the base settings first so the `tpp_product_config` row
         // exists for the registry to record the resolved field ids onto.
@@ -86,7 +91,8 @@ final class ProductConfigManager
 
         $this->customizationFieldRegistry->register(
             $idProduct,
-            $config->getCassettePricePerMeter() !== null
+            $config->getCassettePricePerMeter() !== null,
+            $config->getIdAttributeGroupMechanismColor() !== null
         );
     }
 
@@ -113,6 +119,7 @@ final class ProductConfigManager
             'max_height' => $config->getMaxHeight(),
             'unit' => $config->getUnit(),
             'cassette_price_per_meter' => $config->getCassettePricePerMeter(),
+            'id_attribute_group_mechanism_color' => $config->getIdAttributeGroupMechanismColor(),
         ];
     }
 
@@ -150,5 +157,22 @@ final class ProductConfigManager
         }
 
         return $price;
+    }
+
+    /**
+     * Normalizes the picked color attribute group id: empty/0 => null (choice
+     * not offered), otherwise the id, but only if it still resolves to a live
+     * `group_type = 'color'` group in this shop. Anything else is stored as
+     * null rather than dangling — the module never trusts an id it did not
+     * just re-read from core.
+     */
+    private function mechanismColorGroupId(array $tppSettings): ?int
+    {
+        $idGroup = (int) ($tppSettings['tpp_mechanism_color_group'] ?? 0);
+        if ($idGroup <= 0) {
+            return null;
+        }
+
+        return $this->colorAttributeProvider->isColorGroup($idGroup, $this->contextShopId) ? $idGroup : null;
     }
 }
