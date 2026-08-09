@@ -9,7 +9,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Owns the lifecycle of the native `customization_field` rows (Width,
- * Height, Cord side, Cassette, Mechanism color) that carry a tailored
+ * Height, Cord side, Cassette, Mechanism color, Roll direction) that carry a tailored
  * product's entered choices (spec Iteration 6, D1/6-E), so the merchant
  * never touches PrestaShop's own Customization tab.
  *
@@ -43,6 +43,14 @@ final class CustomizationFieldRegistry
         'cord_side' => 'id_customization_field_cord_side',
         'cassette' => 'id_customization_field_cassette',
         'mechanism_color' => 'id_customization_field_mechanism_color',
+        'roll_direction' => 'id_customization_field_roll_direction',
+    ];
+
+    /** Slug => English label for the fields provisioned only when the merchant enables them. */
+    private const OPTIONAL_FIELD_LABELS = [
+        'cassette' => 'Cassette',
+        'mechanism_color' => 'Mechanism color',
+        'roll_direction' => 'Roll direction',
     ];
 
     public function __construct(
@@ -53,17 +61,19 @@ final class CustomizationFieldRegistry
 
     /**
      * Ensures the three unconditional `is_module=1` Width/Height/Cord-side
-     * fields exist for $idProduct, plus a fourth field (Cassette) gated on
-     * $withCassette and a fifth (Mechanism color) gated on
-     * $withMechanismColor. Idempotent: reuses the ids already stored on
-     * `tpp_product_config` when the referenced rows still exist and are
-     * live; otherwise (re)provisions a fresh field. A false gate soft-deletes
-     * any stored field for that slot instead.
+     * fields exist for $idProduct, plus one field per {@see self::OPTIONAL_FIELD_LABELS}
+     * slug gated on `$optionalFields[$slug]` (missing key reads as false).
+     * Idempotent: reuses the ids already stored on `tpp_product_config` when
+     * the referenced rows still exist and are live; otherwise (re)provisions
+     * a fresh field. A false gate soft-deletes any stored field for that slot
+     * instead.
      *
      * Also sets `product.customizable = 1` (never `2`) and keeps
      * `text_fields` / `uploadable_files` counters consistent.
+     *
+     * @param array<string, bool> $optionalFields slug-keyed gates, see {@see self::OPTIONAL_FIELD_LABELS}
      */
-    public function register(int $idProduct, bool $withCassette, bool $withMechanismColor): void
+    public function register(int $idProduct, array $optionalFields): void
     {
         $stored = $this->getStoredFieldIds($idProduct);
 
@@ -85,20 +95,14 @@ final class CustomizationFieldRegistry
             $ids['cord_side'] = $this->createField($idProduct, 'Cord side');
         }
 
-        if ($withCassette) {
-            $ids['cassette'] = $this->resolveLiveFieldId($stored['cassette'], $idProduct)
-                ?? $this->createField($idProduct, 'Cassette');
-        } else {
-            $this->softDeleteFields($idProduct, array_values(array_filter([$stored['cassette']])));
-            $ids['cassette'] = null;
-        }
-
-        if ($withMechanismColor) {
-            $ids['mechanism_color'] = $this->resolveLiveFieldId($stored['mechanism_color'], $idProduct)
-                ?? $this->createField($idProduct, 'Mechanism color');
-        } else {
-            $this->softDeleteFields($idProduct, array_values(array_filter([$stored['mechanism_color']])));
-            $ids['mechanism_color'] = null;
+        foreach (self::OPTIONAL_FIELD_LABELS as $slug => $label) {
+            if ($optionalFields[$slug] ?? false) {
+                $ids[$slug] = $this->resolveLiveFieldId($stored[$slug], $idProduct)
+                    ?? $this->createField($idProduct, $label);
+            } else {
+                $this->softDeleteFields($idProduct, array_values(array_filter([$stored[$slug]])));
+                $ids[$slug] = null;
+            }
         }
 
         $this->setStoredFieldIds($idProduct, $ids);

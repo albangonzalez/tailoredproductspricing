@@ -45,6 +45,7 @@ final class ProductConfigManager
             'tpp_cassette_enabled' => ($config && $config->getCassettePricePerMeter() !== null) ? 1 : 0,
             'tpp_cassette_price' => $config ? $config->getCassettePricePerMeter() : null,
             'tpp_mechanism_color_group' => $config ? $config->getIdAttributeGroupMechanismColor() : null,
+            'tpp_roll_direction_enabled' => ($config && $config->isRollDirectionEnabled()) ? 1 : 0,
         ];
     }
 
@@ -83,17 +84,18 @@ final class ProductConfigManager
             ->setMaxHeight($this->nullableDecimal($tppSettings['tpp_max_height'] ?? null))
             ->setUnit($unit)
             ->setCassettePricePerMeter($this->cassettePrice($tppSettings))
-            ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings));
+            ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings))
+            ->setRollDirectionEnabled((bool) ($tppSettings['tpp_roll_direction_enabled'] ?? false));
 
         // Persist the base settings first so the `tpp_product_config` row
         // exists for the registry to record the resolved field ids onto.
         $this->repository->save($config);
 
-        $this->customizationFieldRegistry->register(
-            $idProduct,
-            $config->getCassettePricePerMeter() !== null,
-            $config->getIdAttributeGroupMechanismColor() !== null
-        );
+        $this->customizationFieldRegistry->register($idProduct, [
+            'cassette' => $config->getCassettePricePerMeter() !== null,
+            'mechanism_color' => $config->getIdAttributeGroupMechanismColor() !== null,
+            'roll_direction' => $config->isRollDirectionEnabled(),
+        ]);
     }
 
     /**
@@ -120,6 +122,7 @@ final class ProductConfigManager
             'unit' => $config->getUnit(),
             'cassette_price_per_meter' => $config->getCassettePricePerMeter(),
             'id_attribute_group_mechanism_color' => $config->getIdAttributeGroupMechanismColor(),
+            'roll_direction_enabled' => $config->isRollDirectionEnabled(),
         ];
     }
 

@@ -84,6 +84,20 @@ class TppProductConfig
     private $idAttributeGroupMechanismColor;
 
     /**
+     * Whether the standard/reverse roll-direction choice is offered for this
+     * product. Unlike the cassette price and the mechanism-color group, this
+     * choice carries no value of its own, so it gets an explicit flag column
+     * rather than overloading the nullness of a settings column — and never
+     * the nullness of {@see self::$idCustomizationFieldRollDirection}, which
+     * is provisioning state, not merchant intent.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="roll_direction_enabled", type="boolean", options={"unsigned"=true, "default"=0})
+     */
+    private $rollDirectionEnabled = false;
+
+    /**
      * Id of the module-provisioned "Width" `customization_field` row
      * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry}).
      * Null when the module is enabled but provisioning has not (yet)
@@ -139,6 +153,18 @@ class TppProductConfig
      * @ORM\Column(name="id_customization_field_mechanism_color", type="integer", options={"unsigned"=true}, nullable=true)
      */
     private $idCustomizationFieldMechanismColor;
+
+    /**
+     * Id of the module-provisioned "Roll direction" `customization_field` row.
+     * Null whenever the roll-direction choice is off for the product (i.e.
+     * whenever {@see self::$rollDirectionEnabled} is false).
+     * See {@see self::$idCustomizationFieldWidth}.
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_customization_field_roll_direction", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idCustomizationFieldRollDirection;
 
     public function __construct(int $idProduct)
     {
@@ -290,6 +316,30 @@ class TppProductConfig
     public function setIdCustomizationFieldMechanismColor(?int $idCustomizationFieldMechanismColor): self
     {
         $this->idCustomizationFieldMechanismColor = $idCustomizationFieldMechanismColor;
+
+        return $this;
+    }
+
+    public function isRollDirectionEnabled(): bool
+    {
+        return $this->rollDirectionEnabled;
+    }
+
+    public function setRollDirectionEnabled(bool $rollDirectionEnabled): self
+    {
+        $this->rollDirectionEnabled = $rollDirectionEnabled;
+
+        return $this;
+    }
+
+    public function getIdCustomizationFieldRollDirection(): ?int
+    {
+        return $this->idCustomizationFieldRollDirection;
+    }
+
+    public function setIdCustomizationFieldRollDirection(?int $idCustomizationFieldRollDirection): self
+    {
+        $this->idCustomizationFieldRollDirection = $idCustomizationFieldRollDirection;
 
         return $this;
     }

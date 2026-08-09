@@ -24,7 +24,8 @@ final class ProductChoicesProvider
      * @return array{
      *     idProduct:int,
      *     cassetteEnabled:bool,
-     *     mechanismColorOptions:list<array{id:int,name:string,color:?string}>
+     *     mechanismColorOptions:list<array{id:int,name:string,color:?string}>,
+     *     rollDirectionEnabled:bool
      * }|null null when the module is not enabled for this product
      */
     public function getViewData(int $idProduct, int $idLang, int $idShop): ?array
@@ -42,6 +43,7 @@ final class ProductChoicesProvider
             'idProduct' => $idProduct,
             'cassetteEnabled' => $config->getCassettePricePerMeter() !== null,
             'mechanismColorOptions' => $this->mechanismColorOptions($config->getIdAttributeGroupMechanismColor(), $idLang, $idShop),
+            'rollDirectionEnabled' => $config->isRollDirectionEnabled(),
         ];
     }
 

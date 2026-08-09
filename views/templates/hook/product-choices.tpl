@@ -62,3 +62,25 @@
         </div>
     </fieldset>
 {/if}
+
+{if $rollDirectionEnabled}
+    <fieldset class="tpp-choices">
+        <legend class="form-label tpp-choices__legend">
+            {l s='Roll direction' d='Modules.Tailoredproductspricing.Shop'}
+        </legend>
+
+        <div class="btn-group tpp-choices__group" role="group">
+            <input type="radio" class="btn-check" name="tpp_roll_direction"
+                   id="tpp_roll_direction_standard_{$idProduct|intval}" value="standard" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="tpp_roll_direction_standard_{$idProduct|intval}">
+                {l s='Enrollado estándar' d='Modules.Tailoredproductspricing.Shop'}
+            </label>
+
+            <input type="radio" class="btn-check" name="tpp_roll_direction"
+                   id="tpp_roll_direction_reverse_{$idProduct|intval}" value="reverse" autocomplete="off">
+            <label class="btn btn-outline-primary" for="tpp_roll_direction_reverse_{$idProduct|intval}">
+                {l s='Enrollado invertido' d='Modules.Tailoredproductspricing.Shop'}
+            </label>
+        </div>
+    </fieldset>
+{/if}

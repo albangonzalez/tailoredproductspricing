@@ -23,15 +23,16 @@ use Validate;
  * See .claude/docs/specs/tailoredproductspricing-add-to-cart-customization.md,
  * Addendum B.3/C, and .claude/docs/specs/mechanism-color-choice.md §3.10, for
  * the full design. This step deliberately persists the raw submitted
- * dimensions and cassette choice with no bounds validation, no bot/token
- * gate, and no pricing/surcharge — those are later steps. The mechanism
- * color, in contrast, IS validated (§3.10): the submitted `id_attribute` is
- * checked against the live attribute list of the product's configured group
- * before anything is persisted.
+ * dimensions, cassette choice and roll direction with no bounds validation,
+ * no bot/token gate, and no pricing/surcharge — those are later steps. The
+ * mechanism color, in contrast, IS validated (§3.10): the submitted
+ * `id_attribute` is checked against the live attribute list of the product's
+ * configured group before anything is persisted.
  */
 class AddToCartCustomizer
 {
     private const CASSETTE_VALUES = ['without', 'with'];
+    private const ROLL_DIRECTION_VALUES = ['standard', 'reverse'];
 
     public function __construct(
         private readonly ProductConfigRepository $productConfigRepository,
@@ -64,6 +65,7 @@ class AddToCartCustomizer
         $cordSide = (string) Tools::getValue('tpp_cord_side');
         $cassette = (string) Tools::getValue('tpp_cassette');
         $mechanismColor = (int) Tools::getValue('tpp_mechanism_color');
+        $rollDirection = (string) Tools::getValue('tpp_roll_direction');
 
         $hasDimensions = $width !== '' && $height !== '';
         $hasCordSide = $cordSide !== '' && $config->getIdCustomizationFieldCordSide() !== null;
@@ -82,7 +84,10 @@ class AddToCartCustomizer
         }
         $hasMechanismColor = $mechanismColorName !== null;
 
-        if (!$hasDimensions && !$hasCordSide && !$hasCassette && !$hasMechanismColor) {
+        $hasRollDirection = in_array($rollDirection, self::ROLL_DIRECTION_VALUES, true)
+            && $config->getIdCustomizationFieldRollDirection() !== null;
+
+        if (!$hasDimensions && !$hasCordSide && !$hasCassette && !$hasMechanismColor && !$hasRollDirection) {
             return;
         }
 
@@ -111,6 +116,10 @@ class AddToCartCustomizer
 
         if ($hasMechanismColor) {
             $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldMechanismColor(), Product::CUSTOMIZE_TEXTFIELD, $mechanismColorName, true);
+        }
+
+        if ($hasRollDirection) {
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldRollDirection(), Product::CUSTOMIZE_TEXTFIELD, $rollDirection, true);
         }
 
         if ($idCustomization === false) {

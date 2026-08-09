@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PrestaShop\Module\TailoredProductsPricing\Form\Type;
 
 use PrestaShopBundle\Form\Admin\Type\DisablingSwitchType;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -89,6 +90,15 @@ class TailoredProductsSettingsType extends AbstractType
                 'required' => false,
                 'choices' => $options['color_attribute_groups'],
                 'placeholder' => 'Not offered',
+                'row_attr' => ['class' => self::FIELD_CLASS],
+                'translation_domain' => self::DOMAIN,
+                'form_theme' => self::FORM_THEME,
+            ])
+            ->add('tpp_roll_direction_enabled', SwitchType::class, [
+                'label' => 'Offer a roll direction choice (standard / reverse)',
+                'help' => 'Lets the customer choose whether the fabric unrolls off the back or the front of the tube. Does not affect the price.',
+                'required' => false,
+                'show_choices' => false,
                 'row_attr' => ['class' => self::FIELD_CLASS],
                 'translation_domain' => self::DOMAIN,
                 'form_theme' => self::FORM_THEME,

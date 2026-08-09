@@ -26,6 +26,8 @@ final class SqlQueries
               `id_customization_field_cassette` int(10) unsigned DEFAULT NULL,
               `id_attribute_group_mechanism_color` int(10) unsigned DEFAULT NULL,
               `id_customization_field_mechanism_color` int(10) unsigned DEFAULT NULL,
+              `roll_direction_enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,
+              `id_customization_field_roll_direction` int(10) unsigned DEFAULT NULL,
               PRIMARY KEY (`id_product`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 
