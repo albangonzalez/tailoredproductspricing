@@ -7,6 +7,7 @@ use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigReposi
 use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
 use PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer;
 use PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider;
+use PrestaShop\Module\TailoredProductsPricing\Service\ProductChoicesProvider;
 use PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager;
 
 if (!defined('_PS_VERSION_')) {
@@ -138,16 +139,13 @@ class TailoredProductsPricing extends Module
     public function hookDisplayProductCustomizationBottom(array $params): string
     {
         $idProduct = (int) ($params['product']['id'] ?? $params['product']['id_product'] ?? 0);
-        if ($idProduct <= 0) {
+
+        $data = $this->get(ProductChoicesProvider::class)->getViewData($idProduct);
+        if ($data === null) {
             return '';
         }
 
-        $config = $this->get(ProductConfigRepository::class)->findByProductId($idProduct);
-        if ($config === null) {
-            return '';
-        }
-
-        $this->context->smarty->assign('idProduct', $idProduct);
+        $this->context->smarty->assign($data);
 
         return $this->display(__FILE__, 'product-choices.tpl');
     }

@@ -60,6 +60,17 @@ class TppProductConfig
     private $unit = 'cm';
 
     /**
+     * Cassette (cenefa) price, expressed per linear meter of the customer-entered
+     * width: surcharge = value × width_m. Null means the cassette choice is not
+     * offered for this product — there is no separate enabled flag.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(name="cassette_price_per_meter", type="decimal", precision=20, scale=2, nullable=true)
+     */
+    private $cassettePricePerMeter;
+
+    /**
      * Id of the module-provisioned "Width" `customization_field` row
      * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry}).
      * Null when the module is enabled but provisioning has not (yet)
@@ -90,6 +101,19 @@ class TppProductConfig
      * @ORM\Column(name="id_customization_field_cord_side", type="integer", options={"unsigned"=true}, nullable=true)
      */
     private $idCustomizationFieldCordSide;
+
+    /**
+     * Id of the module-provisioned "Cassette" `customization_field` row.
+     * Unlike the width/height/cord-side ids, this one is null whenever the
+     * cassette choice is off for the product (i.e. whenever
+     * {@see self::$cassettePricePerMeter} is null).
+     * See {@see self::$idCustomizationFieldWidth}.
+     *
+     * @var int|null
+     *
+     * @ORM\Column(name="id_customization_field_cassette", type="integer", options={"unsigned"=true}, nullable=true)
+     */
+    private $idCustomizationFieldCassette;
 
     public function __construct(int $idProduct)
     {
@@ -193,6 +217,30 @@ class TppProductConfig
     public function setIdCustomizationFieldCordSide(?int $idCustomizationFieldCordSide): self
     {
         $this->idCustomizationFieldCordSide = $idCustomizationFieldCordSide;
+
+        return $this;
+    }
+
+    public function getCassettePricePerMeter(): ?string
+    {
+        return $this->cassettePricePerMeter;
+    }
+
+    public function setCassettePricePerMeter(?string $cassettePricePerMeter): self
+    {
+        $this->cassettePricePerMeter = $cassettePricePerMeter;
+
+        return $this;
+    }
+
+    public function getIdCustomizationFieldCassette(): ?int
+    {
+        return $this->idCustomizationFieldCassette;
+    }
+
+    public function setIdCustomizationFieldCassette(?int $idCustomizationFieldCassette): self
+    {
+        $this->idCustomizationFieldCassette = $idCustomizationFieldCassette;
 
         return $this;
     }

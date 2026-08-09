@@ -16,6 +16,8 @@ class TailoredProductsSettingsType extends AbstractType
 {
     private const FIELD_CLASS = 'js-tpp-dimension-field';
     private const FIELD_SELECTOR = '.js-tpp-dimension-field';
+    private const CASSETTE_FIELD_CLASS = 'js-tpp-cassette-field';
+    private const CASSETTE_FIELD_SELECTOR = '.js-tpp-cassette-field';
     private const FORM_THEME = '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig';
     private const DOMAIN = 'Modules.Tailoredproductspricing.Admin';
 
@@ -60,6 +62,27 @@ class TailoredProductsSettingsType extends AbstractType
                 'form_theme' => self::FORM_THEME,
             ]);
         }
+
+        $builder
+            ->add('tpp_cassette_enabled', DisablingSwitchType::class, [
+                'label' => 'Offer a cassette (cenefa) option for this product',
+                'required' => false,
+                'target_selector' => self::CASSETTE_FIELD_SELECTOR,
+                'disable_on_match' => true,
+                'row_attr' => ['class' => self::FIELD_CLASS],
+                'translation_domain' => self::DOMAIN,
+                'form_theme' => self::FORM_THEME,
+            ])
+            ->add('tpp_cassette_price', NumberType::class, [
+                'label' => 'Cassette price per linear meter of width',
+                'help' => 'Surcharge = this value × the width entered by the customer. Not applied to prices yet.',
+                'required' => false,
+                'scale' => 2,
+                'attr' => ['min' => '0', 'step' => '0.01', 'placeholder' => '0.00'],
+                'row_attr' => ['class' => self::CASSETTE_FIELD_CLASS],
+                'translation_domain' => self::DOMAIN,
+                'form_theme' => self::FORM_THEME,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

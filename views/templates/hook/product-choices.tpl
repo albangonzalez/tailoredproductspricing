@@ -17,3 +17,25 @@
         </label>
     </div>
 </fieldset>
+
+{if $cassetteEnabled}
+    <fieldset class="tpp-choices">
+        <legend class="form-label tpp-choices__legend">
+            {l s='Cassette' d='Modules.Tailoredproductspricing.Shop'}
+        </legend>
+
+        <div class="btn-group tpp-choices__group" role="group">
+            <input type="radio" class="btn-check" name="tpp_cassette"
+                   id="tpp_cassette_without_{$idProduct|intval}" value="without" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="tpp_cassette_without_{$idProduct|intval}">
+                {l s='Sin cenefa' d='Modules.Tailoredproductspricing.Shop'}
+            </label>
+
+            <input type="radio" class="btn-check" name="tpp_cassette"
+                   id="tpp_cassette_with_{$idProduct|intval}" value="with" autocomplete="off">
+            <label class="btn btn-outline-primary" for="tpp_cassette_with_{$idProduct|intval}">
+                {l s='Con cenefa' d='Modules.Tailoredproductspricing.Shop'}
+            </label>
+        </div>
+    </fieldset>
+{/if}

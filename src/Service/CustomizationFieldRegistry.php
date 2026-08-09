@@ -39,17 +39,19 @@ final class CustomizationFieldRegistry
     }
 
     /**
-     * Ensures the three `is_module=1` Width/Height/Cord-side fields exist
-     * for $idProduct. Idempotent: reuses the ids already stored on
+     * Ensures the three unconditional `is_module=1` Width/Height/Cord-side
+     * fields exist for $idProduct, plus a fourth, optional Cassette field
+     * gated on $withCassette. Idempotent: reuses the ids already stored on
      * `tpp_product_config` when the referenced rows still exist and are
-     * live; otherwise (re)provisions a fresh field.
+     * live; otherwise (re)provisions a fresh field. $withCassette === false
+     * soft-deletes any stored cassette field instead.
      *
      * Also sets `product.customizable = 1` (never `2`) and keeps
      * `text_fields` / `uploadable_files` counters consistent.
      */
-    public function register(int $idProduct): void
+    public function register(int $idProduct, bool $withCassette): void
     {
-        [$storedWidthId, $storedHeightId, $storedCordSideId] = $this->getStoredFieldIds($idProduct);
+        [$storedWidthId, $storedHeightId, $storedCordSideId, $storedCassetteId] = $this->getStoredFieldIds($idProduct);
 
         $widthId = $this->resolveLiveFieldId($storedWidthId, $idProduct);
         $heightId = $this->resolveLiveFieldId($storedHeightId, $idProduct);
@@ -67,13 +69,21 @@ final class CustomizationFieldRegistry
             $cordSideId = $this->createField($idProduct, 'Cord side');
         }
 
-        $this->setStoredFieldIds($idProduct, $widthId, $heightId, $cordSideId);
+        if ($withCassette) {
+            $cassetteId = $this->resolveLiveFieldId($storedCassetteId, $idProduct)
+                ?? $this->createField($idProduct, 'Cassette');
+        } else {
+            $this->softDeleteFields($idProduct, array_values(array_filter([$storedCassetteId])));
+            $cassetteId = null;
+        }
+
+        $this->setStoredFieldIds($idProduct, $widthId, $heightId, $cordSideId, $cassetteId);
         $this->setCustomizable($idProduct, 1);
         $this->refreshCustomizationCounters($idProduct);
     }
 
     /**
-     * Soft-deletes (`is_deleted = 1`) the module's three fields — never
+     * Soft-deletes (`is_deleted = 1`) the module's four fields — never
      * hard-delete (6-C) — clears the stored id references, and recomputes
      * `product.customizable` from whatever live (non-deleted) customization
      * fields remain for the product, rather than blindly zeroing it: an
@@ -82,34 +92,30 @@ final class CustomizationFieldRegistry
      */
     public function unregister(int $idProduct): void
     {
-        [$storedWidthId, $storedHeightId, $storedCordSideId] = $this->getStoredFieldIds($idProduct);
+        [$storedWidthId, $storedHeightId, $storedCordSideId, $storedCassetteId] = $this->getStoredFieldIds($idProduct);
 
-        $idsToSoftDelete = array_values(array_filter([$storedWidthId, $storedHeightId, $storedCordSideId]));
+        $this->softDeleteFields(
+            $idProduct,
+            array_values(array_filter([$storedWidthId, $storedHeightId, $storedCordSideId, $storedCassetteId]))
+        );
 
-        if ($idsToSoftDelete !== []) {
-            $this->connection->createQueryBuilder()
-                ->update(_DB_PREFIX_ . 'customization_field')
-                ->set('is_deleted', ':deleted')
-                ->where('id_product = :idProduct')
-                ->andWhere('id_customization_field IN (:ids)')
-                ->setParameter('deleted', 1)
-                ->setParameter('idProduct', $idProduct)
-                ->setParameter('ids', $idsToSoftDelete, Connection::PARAM_INT_ARRAY)
-                ->executeStatement();
-        }
-
-        $this->setStoredFieldIds($idProduct, null, null, null);
+        $this->setStoredFieldIds($idProduct, null, null, null, null);
         $this->recomputeCustomizableFromRemainingFields($idProduct);
         $this->refreshCustomizationCounters($idProduct);
     }
 
     /**
-     * @return array{0: int|null, 1: int|null, 2: int|null}
+     * @return array{0: int|null, 1: int|null, 2: int|null, 3: int|null}
      */
     private function getStoredFieldIds(int $idProduct): array
     {
         $row = $this->connection->createQueryBuilder()
-            ->select('id_customization_field_width', 'id_customization_field_height', 'id_customization_field_cord_side')
+            ->select(
+                'id_customization_field_width',
+                'id_customization_field_height',
+                'id_customization_field_cord_side',
+                'id_customization_field_cassette'
+            )
             ->from(_DB_PREFIX_ . 'tpp_product_config')
             ->where('id_product = :idProduct')
             ->setParameter('idProduct', $idProduct)
@@ -117,17 +123,18 @@ final class CustomizationFieldRegistry
             ->fetchAssociative();
 
         if ($row === false) {
-            return [null, null, null];
+            return [null, null, null, null];
         }
 
         return [
             $row['id_customization_field_width'] !== null ? (int) $row['id_customization_field_width'] : null,
             $row['id_customization_field_height'] !== null ? (int) $row['id_customization_field_height'] : null,
             $row['id_customization_field_cord_side'] !== null ? (int) $row['id_customization_field_cord_side'] : null,
+            $row['id_customization_field_cassette'] !== null ? (int) $row['id_customization_field_cassette'] : null,
         ];
     }
 
-    private function setStoredFieldIds(int $idProduct, ?int $widthId, ?int $heightId, ?int $cordSideId): void
+    private function setStoredFieldIds(int $idProduct, ?int $widthId, ?int $heightId, ?int $cordSideId, ?int $cassetteId): void
     {
         $this->connection->update(
             _DB_PREFIX_ . 'tpp_product_config',
@@ -135,9 +142,30 @@ final class CustomizationFieldRegistry
                 'id_customization_field_width' => $widthId,
                 'id_customization_field_height' => $heightId,
                 'id_customization_field_cord_side' => $cordSideId,
+                'id_customization_field_cassette' => $cassetteId,
             ],
             ['id_product' => $idProduct]
         );
+    }
+
+    /**
+     * @param list<int> $ids
+     */
+    private function softDeleteFields(int $idProduct, array $ids): void
+    {
+        if ($ids === []) {
+            return;
+        }
+
+        $this->connection->createQueryBuilder()
+            ->update(_DB_PREFIX_ . 'customization_field')
+            ->set('is_deleted', ':deleted')
+            ->where('id_product = :idProduct')
+            ->andWhere('id_customization_field IN (:ids)')
+            ->setParameter('deleted', 1)
+            ->setParameter('idProduct', $idProduct)
+            ->setParameter('ids', $ids, Connection::PARAM_INT_ARRAY)
+            ->executeStatement();
     }
 
     /**

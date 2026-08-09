@@ -21,11 +21,13 @@ use Validate;
  *
  * See .claude/docs/specs/tailoredproductspricing-add-to-cart-customization.md,
  * Addendum B.3/C, for the full design. This step deliberately persists the
- * raw submitted dimensions with no bounds validation, no bot/token gate, and
- * no pricing/surcharge — those are later steps.
+ * raw submitted dimensions and cassette choice with no bounds validation, no
+ * bot/token gate, and no pricing/surcharge — those are later steps.
  */
 class AddToCartCustomizer
 {
+    private const CASSETTE_VALUES = ['without', 'with'];
+
     public function __construct(
         private readonly ProductConfigRepository $productConfigRepository
     ) {
@@ -54,11 +56,14 @@ class AddToCartCustomizer
         $width = (string) Tools::getValue('tpp_width');
         $height = (string) Tools::getValue('tpp_height');
         $cordSide = (string) Tools::getValue('tpp_cord_side');
+        $cassette = (string) Tools::getValue('tpp_cassette');
 
         $hasDimensions = $width !== '' && $height !== '';
         $hasCordSide = $cordSide !== '' && $config->getIdCustomizationFieldCordSide() !== null;
+        $hasCassette = in_array($cassette, self::CASSETTE_VALUES, true)
+            && $config->getIdCustomizationFieldCassette() !== null;
 
-        if (!$hasDimensions && !$hasCordSide) {
+        if (!$hasDimensions && !$hasCordSide && !$hasCassette) {
             return;
         }
 
@@ -79,6 +84,10 @@ class AddToCartCustomizer
 
         if ($hasCordSide) {
             $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldCordSide(), Product::CUSTOMIZE_TEXTFIELD, $cordSide, true);
+        }
+
+        if ($hasCassette) {
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldCassette(), Product::CUSTOMIZE_TEXTFIELD, $cassette, true);
         }
 
         if ($idCustomization === false) {

@@ -39,6 +39,8 @@ final class ProductConfigManager
             'tpp_max_width' => $config ? $config->getMaxWidth() : null,
             'tpp_min_height' => $config ? $config->getMinHeight() : null,
             'tpp_max_height' => $config ? $config->getMaxHeight() : null,
+            'tpp_cassette_enabled' => ($config && $config->getCassettePricePerMeter() !== null) ? 1 : 0,
+            'tpp_cassette_price' => $config ? $config->getCassettePricePerMeter() : null,
         ];
     }
 
@@ -75,13 +77,17 @@ final class ProductConfigManager
             ->setMaxWidth($this->nullableDecimal($tppSettings['tpp_max_width'] ?? null))
             ->setMinHeight($this->nullableDecimal($tppSettings['tpp_min_height'] ?? null))
             ->setMaxHeight($this->nullableDecimal($tppSettings['tpp_max_height'] ?? null))
-            ->setUnit($unit);
+            ->setUnit($unit)
+            ->setCassettePricePerMeter($this->cassettePrice($tppSettings));
 
         // Persist the base settings first so the `tpp_product_config` row
         // exists for the registry to record the resolved field ids onto.
         $this->repository->save($config);
 
-        $this->customizationFieldRegistry->register($idProduct);
+        $this->customizationFieldRegistry->register(
+            $idProduct,
+            $config->getCassettePricePerMeter() !== null
+        );
     }
 
     /**
@@ -106,6 +112,7 @@ final class ProductConfigManager
             'min_height' => $config->getMinHeight(),
             'max_height' => $config->getMaxHeight(),
             'unit' => $config->getUnit(),
+            'cassette_price_per_meter' => $config->getCassettePricePerMeter(),
         ];
     }
 
@@ -123,5 +130,25 @@ final class ProductConfigManager
         }
 
         return (string) (float) str_replace(',', '.', $value);
+    }
+
+    /**
+     * Enforces the switch state <=> column nullness invariant: off stores
+     * null, on always stores a non-null decimal (blank/negative/non-numeric
+     * input clamps to '0.00' rather than leaving the column null while the
+     * switch is on).
+     */
+    private function cassettePrice(array $tppSettings): ?string
+    {
+        if (!($tppSettings['tpp_cassette_enabled'] ?? false)) {
+            return null;
+        }
+
+        $price = $this->nullableDecimal($tppSettings['tpp_cassette_price'] ?? null);
+        if ($price === null || (float) $price < 0) {
+            return '0.00';
+        }
+
+        return $price;
     }
 }
