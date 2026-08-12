@@ -18,6 +18,12 @@
         return document.getElementById('tpp_height');
     }
 
+    function getCassetteValue() {
+        var checked = document.querySelector('input[name="tpp_cassette"]:checked');
+
+        return checked ? checked.value : '';
+    }
+
     function normalizeDecimal(raw) {
         if (raw === null || raw === undefined) {
             return null;
@@ -136,8 +142,8 @@
         return { value: value, valid: true };
     }
 
-    function buildSignature(idProductAttribute, width, height) {
-        return idProductAttribute + '|' + width + '|' + height;
+    function buildSignature(idProductAttribute, width, height, cassette) {
+        return idProductAttribute + '|' + width + '|' + height + '|' + cassette;
     }
 
     function postAjax(ajaxUrl, action, params) {
@@ -175,13 +181,15 @@
         if (!config.ajaxUrl || !config.idProductAttribute) {
             return;
         }
-        var signature = buildSignature(config.idProductAttribute, width, height);
+        var cassette = getCassetteValue();
+        var signature = buildSignature(config.idProductAttribute, width, height, cassette);
 
         postAjax(config.ajaxUrl, 'quote', {
             id_product: config.idProduct,
             id_product_attribute: config.idProductAttribute,
             width: width,
             height: height,
+            cassette: cassette,
         }).then(function (result) {
             // Ignore stale responses — only trust this result if the
             // inputs still match what produced the request.
@@ -212,8 +220,9 @@
         }
         var width = normalizeDecimal(widthInput.value);
         var height = normalizeDecimal(heightInput.value);
+        var cassette = getCassetteValue();
 
-        return buildSignature(config.idProductAttribute, width, height) === signature;
+        return buildSignature(config.idProductAttribute, width, height, cassette) === signature;
     }
 
     function onDimensionInput(container) {
@@ -265,6 +274,24 @@
         container.dataset.tppInputsBound = '1';
     }
 
+    var cassetteBound = false;
+
+    function bindCassetteInput() {
+        if (cassetteBound) {
+            return;
+        }
+        document.addEventListener('change', function (event) {
+            if (!event.target || event.target.name !== 'tpp_cassette') {
+                return;
+            }
+            var container = getContainer();
+            if (container) {
+                onDimensionInput(container);
+            }
+        });
+        cassetteBound = true;
+    }
+
     function init(preservedValues) {
         var container = getContainer();
         if (!container) {
@@ -281,6 +308,7 @@
         }
 
         bindDimensionInputs(container);
+        bindCassetteInput();
 
         setPreviewState(container, 'idle', '');
 

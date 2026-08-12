@@ -17,6 +17,11 @@ class TailoredProductsPricingAjaxModuleFrontController extends ModuleFrontContro
         'mm' => 1000.0,
     ];
 
+    // Mirrors AddToCartCustomizer::CASSETTE_VALUES; duplicated deliberately,
+    // see cassette-pricing spec §3.1.
+    private const CASSETTE_VALUES = ['without', 'with'];
+    private const CASSETTE_SELECTED = 'with';
+
     /**
      * Computes the tailored unit price for the given
      * dimensions.
@@ -30,15 +35,28 @@ class TailoredProductsPricingAjaxModuleFrontController extends ModuleFrontContro
         $floatParser = new FloatParser();
         $width = $floatParser->fromString((string) Tools::getValue('width'));
         $height = $floatParser->fromString((string) Tools::getValue('height'));
+        $cassette = (string) Tools::getValue('cassette');
 
         $productConfig = $this->getProductConfigRepository()->findByProductId($idProduct);
         $pricePerSqm = $this->getCombinationConfigRepository()->getPricePerSqm($idProductAttribute);
+
+        if ($productConfig === null || !isset(self::METERS_PER_UNIT[$productConfig->getUnit()])) {
+            $this->ajaxRender(json_encode(['success' => false]));
+
+            return;
+        }
 
         $metersPerUnit = self::METERS_PER_UNIT[$productConfig->getUnit()];
         $widthInMeters = $width / $metersPerUnit;
         $heightInMeters = $height / $metersPerUnit;
 
-        $price = $pricePerSqm * $widthInMeters * $heightInMeters;
+        $cassettePricePerMeter = $productConfig->getCassettePricePerMeter();
+        $cassetteSurcharge = 0.0;
+        if ($cassettePricePerMeter !== null && $cassette === self::CASSETTE_SELECTED) {
+            $cassetteSurcharge = (float) $cassettePricePerMeter * $widthInMeters;
+        }
+
+        $price = $pricePerSqm * $widthInMeters * $heightInMeters + $cassetteSurcharge;
 
         $currency = $this->context->currency;
         $priceFormatted = $this->context->getCurrentLocale()->formatPrice($price, $currency->iso_code);
