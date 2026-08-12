@@ -3,6 +3,9 @@
 
     var DEBOUNCE_MS = 300;
     var CONTAINER_ID = 'tpp-dimensions-form';
+    var PRICE_SCOPE_SELECTOR = '.js-product-container';
+    var PRICE_SELECTOR = '.js-product-prices .product__price';
+    var BASE_HTML_KEY = 'tppBasePrice'; // data-tpp-base-price
 
     var debounceTimer = null;
 
@@ -73,19 +76,48 @@
         };
     }
 
-    function getPreviewElement(container) {
-        return container.querySelector('.tpp-price-preview');
+    function getThemePriceElement(container) {
+        var scope = container.closest(PRICE_SCOPE_SELECTOR) || document;
+
+        return scope.querySelector(PRICE_SELECTOR);
     }
 
-    function setPreviewState(container, state, priceText) {
-        var previewEl = getPreviewElement(container);
-        if (!previewEl) {
+    function writeThemePrice(container, priceHtmlText) {
+        var el = getThemePriceElement(container);
+        if (!el) {
             return;
         }
-        previewEl.dataset.state = state;
-        var valueNode = previewEl.querySelector('[data-role="price"]');
-        if (valueNode) {
-            valueNode.textContent = priceText || '';
+        if (el.dataset[BASE_HTML_KEY] === undefined) {
+            // Cached on the node itself, not in a JS variable: core replaces this
+            // whole subtree on combination change, so the cache must die with it.
+            el.dataset[BASE_HTML_KEY] = el.innerHTML;
+        }
+
+        var label = el.querySelector('.visually-hidden');
+        el.innerHTML = '';
+        if (label) {
+            el.appendChild(label);
+        }
+        var valueNode = document.createElement('span');
+        valueNode.className = 'tpp-price-value';
+        valueNode.textContent = priceHtmlText || '';
+        el.appendChild(valueNode);
+    }
+
+    function restoreThemePrice(container) {
+        var el = getThemePriceElement(container);
+        if (!el || el.dataset[BASE_HTML_KEY] === undefined) {
+            return;
+        }
+        el.innerHTML = el.dataset[BASE_HTML_KEY];
+        delete el.dataset[BASE_HTML_KEY];
+    }
+
+    function updatePriceDisplay(container, state, priceText) {
+        if (state === 'ok') {
+            writeThemePrice(container, priceText);
+        } else {
+            restoreThemePrice(container);
         }
     }
 
@@ -198,17 +230,17 @@
             }
 
             if (result.httpStatus !== 200 || !result.body || result.body.success === false) {
-                setPreviewState(container, 'error', '');
+                updatePriceDisplay(container, 'error', '');
 
                 return;
             }
 
-            setPreviewState(container, 'ok', result.body.priceFormatted);
+            updatePriceDisplay(container, 'ok', result.body.priceFormatted);
         }).catch(function () {
             if (!isCurrentSignature(config, signature)) {
                 return;
             }
-            setPreviewState(container, 'error', '');
+            updatePriceDisplay(container, 'error', '');
         });
     }
 
@@ -243,7 +275,7 @@
         var height = validateDimension(container, heightInput, 'height', config.messages);
 
         if (!width.valid || !height.valid) {
-            setPreviewState(container, 'idle', '');
+            updatePriceDisplay(container, 'idle', '');
 
             return;
         }
@@ -310,7 +342,7 @@
         bindDimensionInputs(container);
         bindCassetteInput();
 
-        setPreviewState(container, 'idle', '');
+        updatePriceDisplay(container, 'idle', '');
 
         if (widthInput && heightInput) {
             var width = validateDimension(container, widthInput, 'width', config.messages);

@@ -38,12 +38,4 @@
             >
         </div>
     </fieldset>
-
-    <div class="tpp-price-preview" data-state="idle">
-        <span class="tpp-price-preview-label">
-            {l s='Price for these dimensions:' d='Modules.Tailoredproductspricing.Shop'}
-        </span>
-        <span class="tpp-price-preview-value" data-role="price"></span>
-        <div class="tpp-bounds-error" data-role="bounds-error"></div>
-    </div>
 </div>
