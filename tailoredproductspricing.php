@@ -184,7 +184,7 @@ class TailoredProductsPricing extends Module
 
     public function hookActionCartControllerInitAfter(array $params): void
     {
-        $this->get(AddToCartCustomizer::class)->handle($params['controller'], Context::getContext()->cart);
+        $this->get(AddToCartCustomizer::class)->handle($params['cart']);
     }
 
     // -------------------------------------------------------------------------

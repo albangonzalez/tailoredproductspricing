@@ -28,3 +28,9 @@ services:
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
             - PrestaShop\Module\TailoredProductsPricing\Entity\TppCombinationConfig
+
+    PrestaShop\Module\TailoredProductsPricing\Service\PriceWriter:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
+    PrestaShop\Module\TailoredProductsPricing\Service\PriceCalculator: ~
