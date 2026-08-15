@@ -32,6 +32,7 @@ services:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
             $translator: '@translator'
+            # $entityManager and $customizationFieldRepository autowire by type.
 
     # Repositories
     PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository:
@@ -45,3 +46,9 @@ services:
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
             - PrestaShop\Module\TailoredProducts\Entity\TpCombinationConfig
+
+    PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository
+        factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
+        arguments:
+            - PrestaShop\Module\TailoredProducts\Entity\TpProductCustomizationField

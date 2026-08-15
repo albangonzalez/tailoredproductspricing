@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace PrestaShop\Module\TailoredProducts\Service;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use PrestaShop\Module\TailoredProducts\Entity\TpProductCustomizationField;
+use PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -13,16 +16,25 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * product's entered choices (spec Iteration 6, D1/6-E), so the merchant
  * never touches PrestaShop's own Customization tab.
  *
- * Deliberately a **dedicated DBAL adapter** — parameterized `Connection`
- * writes to core-owned tables (`customization_field`, `customization_field_lang`,
- * `product`, `product_shop`) — and **not** the CQRS
- * `SetProductCustomizationFieldsCommand` (6-E): the command sets a product's
- * *entire* customization-field set and recomputes `customizable`/counters in
- * ways that would fight this module's fine-grained requirements (forced
- * `is_module=1`, `required=0`, `customizable=1` never `2`, non-destructive
- * coexistence with independent merchant fields on disable). This is the
- * module's sanctioned persistence-boundary adapter for this concern —
- * confined to this single class, per the module layering rule.
+ * Writes to core-owned tables (`customization_field`, `customization_field_lang`,
+ * `product`, `product_shop`) go through a parameterized DBAL `Connection` —
+ * and deliberately **not** the CQRS `SetProductCustomizationFieldsCommand`
+ * (6-E): the command sets a product's *entire* customization-field set and
+ * recomputes `customizable`/counters in ways that would fight this module's
+ * fine-grained requirements (forced `is_module=1`, `required=0`,
+ * `customizable=1` never `2`, non-destructive coexistence with independent
+ * merchant fields on disable). This is the module's sanctioned
+ * persistence-boundary adapter for the core tables — confined to this single
+ * class, per the module layering rule.
+ *
+ * The module's own child table, `tp_product_customization_field` (which
+ * records which `customization_field` id was provisioned for which
+ * (product, slug)), is a Doctrine entity like the rest of this module's own
+ * tables — writes to it go through the injected `EntityManagerInterface` /
+ * `TpProductCustomizationFieldRepository`, never a separate DBAL write, so
+ * this table is never written through two persistence mechanisms in the
+ * same request. See {@see self::setStoredFieldIds()} for the explicit-flush
+ * requirement this implies.
  *
  * Triggered from the existing `actionAfterUpdateProductFormHandler` hook via
  * `ProductConfigManager::saveFromFormData()` — no new hook.
@@ -33,29 +45,55 @@ final class CustomizationFieldRegistry
     private const TRANSLATION_DOMAIN = 'Modules.Tailoredproducts.Admin';
 
     /**
-     * Slug => `tp_product_config` column holding the field id. Keyed map
-     * instead of a positional tuple: a five-element positional array plus a
-     * five-argument setter is a silent-transposition bug waiting to happen.
+     * Public, named constants for the six field slugs — the shared source of
+     * truth for both this class and any other consumer (e.g.
+     * {@see \PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer})
+     * that needs to select a specific slot out of a slug-keyed map. Prefer
+     * these over restringing `'width'`/`'height'`/etc. elsewhere — a typo'd
+     * literal fails silently to `null` (the child table has no SQL FK to
+     * lean on), a typo'd constant name fails loudly at parse time.
      */
-    private const FIELD_COLUMNS = [
-        'width' => 'id_customization_field_width',
-        'height' => 'id_customization_field_height',
-        'cord_side' => 'id_customization_field_cord_side',
-        'cassette' => 'id_customization_field_cassette',
-        'mechanism_color' => 'id_customization_field_mechanism_color',
-        'roll_direction' => 'id_customization_field_roll_direction',
+    public const SLUG_WIDTH = 'width';
+    public const SLUG_HEIGHT = 'height';
+    public const SLUG_CORD_SIDE = 'cord_side';
+    public const SLUG_CASSETTE = 'cassette';
+    public const SLUG_MECHANISM_COLOR = 'mechanism_color';
+    public const SLUG_ROLL_DIRECTION = 'roll_direction';
+
+    /**
+     * The single source of truth for the six (product, slug) rows this
+     * module provisions in `tp_product_customization_field`. Any code
+     * needing "all six slugs" (e.g. `getStoredFieldIds()`'s default map)
+     * must read this constant rather than restring the list.
+     */
+    private const FIELD_SLUGS = [
+        self::SLUG_WIDTH,
+        self::SLUG_HEIGHT,
+        self::SLUG_CORD_SIDE,
+        self::SLUG_CASSETTE,
+        self::SLUG_MECHANISM_COLOR,
+        self::SLUG_ROLL_DIRECTION,
+    ];
+
+    /** Slug => English label for the fields provisioned unconditionally. */
+    private const REQUIRED_FIELD_LABELS = [
+        self::SLUG_WIDTH => 'Width',
+        self::SLUG_HEIGHT => 'Height',
+        self::SLUG_CORD_SIDE => 'Cord side',
     ];
 
     /** Slug => English label for the fields provisioned only when the merchant enables them. */
     private const OPTIONAL_FIELD_LABELS = [
-        'cassette' => 'Cassette',
-        'mechanism_color' => 'Mechanism color',
-        'roll_direction' => 'Roll direction',
+        self::SLUG_CASSETTE => 'Cassette',
+        self::SLUG_MECHANISM_COLOR => 'Mechanism color',
+        self::SLUG_ROLL_DIRECTION => 'Roll direction',
     ];
 
     public function __construct(
         private readonly Connection $connection,
         private readonly TranslatorInterface $translator,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly TpProductCustomizationFieldRepository $customizationFieldRepository,
     ) {
     }
 
@@ -63,10 +101,10 @@ final class CustomizationFieldRegistry
      * Ensures the three unconditional `is_module=1` Width/Height/Cord-side
      * fields exist for $idProduct, plus one field per {@see self::OPTIONAL_FIELD_LABELS}
      * slug gated on `$optionalFields[$slug]` (missing key reads as false).
-     * Idempotent: reuses the ids already stored on `tp_product_config` when
-     * the referenced rows still exist and are live; otherwise (re)provisions
-     * a fresh field. A false gate soft-deletes any stored field for that slot
-     * instead.
+     * Idempotent: reuses the ids already stored in `tp_product_customization_field`
+     * when the referenced rows still exist and are live; otherwise
+     * (re)provisions a fresh field. A false gate soft-deletes any stored
+     * field for that slot instead.
      *
      * Also sets `product.customizable = 1` (never `2`) and keeps
      * `text_fields` / `uploadable_files` counters consistent.
@@ -77,22 +115,11 @@ final class CustomizationFieldRegistry
     {
         $stored = $this->getStoredFieldIds($idProduct);
 
-        $ids = [
-            'width' => $this->resolveLiveFieldId($stored['width'], $idProduct),
-            'height' => $this->resolveLiveFieldId($stored['height'], $idProduct),
-            'cord_side' => $this->resolveLiveFieldId($stored['cord_side'], $idProduct),
-        ];
+        $ids = [];
 
-        if ($ids['width'] === null) {
-            $ids['width'] = $this->createField($idProduct, 'Width');
-        }
-
-        if ($ids['height'] === null) {
-            $ids['height'] = $this->createField($idProduct, 'Height');
-        }
-
-        if ($ids['cord_side'] === null) {
-            $ids['cord_side'] = $this->createField($idProduct, 'Cord side');
+        foreach (self::REQUIRED_FIELD_LABELS as $slug => $label) {
+            $ids[$slug] = $this->resolveLiveFieldId($stored[$slug], $idProduct)
+                ?? $this->createField($idProduct, $label);
         }
 
         foreach (self::OPTIONAL_FIELD_LABELS as $slug => $label) {
@@ -112,11 +139,11 @@ final class CustomizationFieldRegistry
 
     /**
      * Soft-deletes (`is_deleted = 1`) the module's fields — never
-     * hard-delete (6-C) — clears the stored id references, and recomputes
-     * `product.customizable` from whatever live (non-deleted) customization
-     * fields remain for the product, rather than blindly zeroing it: an
-     * independent, non-module customization field the merchant added
-     * separately must survive untouched (6-F).
+     * hard-delete (6-C) — clears the product's `tp_product_customization_field`
+     * rows, and recomputes `product.customizable` from whatever live
+     * (non-deleted) customization fields remain for the product, rather than
+     * blindly zeroing it: an independent, non-module customization field the
+     * merchant added separately must survive untouched (6-F).
      */
     public function unregister(int $idProduct): void
     {
@@ -124,47 +151,60 @@ final class CustomizationFieldRegistry
 
         $this->softDeleteFields($idProduct, array_values(array_filter($stored)));
 
-        $this->setStoredFieldIds($idProduct, array_fill_keys(array_keys(self::FIELD_COLUMNS), null));
+        $this->setStoredFieldIds($idProduct, array_fill_keys(self::FIELD_SLUGS, null));
         $this->recomputeCustomizableFromRemainingFields($idProduct);
         $this->refreshCustomizationCounters($idProduct);
     }
 
     /**
-     * @return array<string, int|null> keyed by {@see self::FIELD_COLUMNS} slug
+     * @return array<string, int|null> keyed by {@see self::FIELD_SLUGS}
      */
     private function getStoredFieldIds(int $idProduct): array
     {
-        $row = $this->connection->createQueryBuilder()
-            ->select(...array_values(self::FIELD_COLUMNS))
-            ->from(_DB_PREFIX_ . 'tp_product_config')
-            ->where('id_product = :idProduct')
-            ->setParameter('idProduct', $idProduct)
-            ->executeQuery()
-            ->fetchAssociative();
+        $rows = $this->customizationFieldRepository->findByProductId($idProduct);
 
-        if ($row === false) {
-            return array_fill_keys(array_keys(self::FIELD_COLUMNS), null);
+        $stored = [];
+        foreach ($rows as $row) {
+            $stored[$row->getFieldSlug()] = $row->getIdCustomizationField();
         }
 
-        $ids = [];
-        foreach (self::FIELD_COLUMNS as $slug => $column) {
-            $ids[$slug] = $row[$column] !== null ? (int) $row[$column] : null;
-        }
-
-        return $ids;
+        return array_fill_keys(self::FIELD_SLUGS, null) + $stored;
     }
 
     /**
-     * @param array<string, int|null> $ids keyed by {@see self::FIELD_COLUMNS} slug
+     * Replaces the product's entire `tp_product_customization_field` row set:
+     * bulk-deletes what's there, then persists one new row per non-null slug
+     * in $ids. Delete-then-insert, not upsert — the whole set is recomputed
+     * on every `register()`/`unregister()` call anyway, and this keeps
+     * "absence of a row means not provisioned" true by construction.
+     *
+     * Writes through the same EntityManager used elsewhere in the request
+     * (never a separate/untracked DBAL write for this table) and **flushes
+     * explicitly before returning** — do not rely on some later, unrelated
+     * flush to pick this up. Deferring the flush is exactly how the identity
+     * map staleness hazard this table extraction was meant to remove would
+     * reappear (see the module's schema-normalization spec, §0.4/§3.3). Do
+     * not "optimize" this flush away.
+     *
+     * @param array<string, int|null> $ids keyed by {@see self::FIELD_SLUGS}
      */
     private function setStoredFieldIds(int $idProduct, array $ids): void
     {
-        $data = [];
-        foreach (self::FIELD_COLUMNS as $slug => $column) {
-            $data[$column] = $ids[$slug] ?? null;
+        $this->customizationFieldRepository->deleteByProductId($idProduct);
+        $this->entityManager->clear(TpProductCustomizationField::class);
+
+        foreach (self::FIELD_SLUGS as $slug) {
+            $idCustomizationField = $ids[$slug] ?? null;
+            if ($idCustomizationField === null) {
+                continue;
+            }
+
+            $this->entityManager->persist(
+                new TpProductCustomizationField($idProduct, $slug, $idCustomizationField)
+            );
         }
 
-        $this->connection->update(_DB_PREFIX_ . 'tp_product_config', $data, ['id_product' => $idProduct]);
+        $this->entityManager->flush();
     }
 
     /**
