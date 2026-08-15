@@ -88,10 +88,9 @@ final class Installer
 
         $softDeleted = $db->execute(
             'UPDATE `' . $prefix . 'customization_field` cf
-             INNER JOIN `' . $prefix . 'tp_product_config` c ON cf.`id_product` = c.`id_product`
+             INNER JOIN `' . $prefix . 'tp_product_customization_field` f ON f.`id_customization_field` = cf.`id_customization_field`
              SET cf.`is_deleted` = 1
-             WHERE cf.`is_deleted` = 0
-             AND cf.`id_customization_field` IN (c.`id_customization_field_width`, c.`id_customization_field_height`, c.`id_customization_field_cord_side`, c.`id_customization_field_cassette`, c.`id_customization_field_mechanism_color`, c.`id_customization_field_roll_direction`)'
+             WHERE cf.`is_deleted` = 0'
         );
 
         if (!$softDeleted) {

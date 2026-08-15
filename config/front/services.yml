@@ -12,7 +12,7 @@ services:
         # autowires ProductConfigRepository by type
 
     PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer: ~
-        # autowires ProductConfigRepository by type
+        # autowires ProductConfigRepository / TpProductCustomizationFieldRepository by type
 
     PrestaShop\Module\TailoredProducts\Service\ProductChoicesProvider: ~
         # autowires ProductConfigRepository by type
@@ -28,6 +28,12 @@ services:
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
             - PrestaShop\Module\TailoredProducts\Entity\TpCombinationConfig
+
+    PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository
+        factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
+        arguments:
+            - PrestaShop\Module\TailoredProducts\Entity\TpProductCustomizationField
 
     PrestaShop\Module\TailoredProducts\Service\PriceWriter:
         arguments:

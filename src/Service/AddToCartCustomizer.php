@@ -10,6 +10,7 @@ use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
 use PrestaShop\Module\TailoredProducts\Entity\TpProductConfig;
 use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
 use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository;
 use PrestaShopException;
 use Product;
 use Tools;
@@ -43,6 +44,7 @@ class AddToCartCustomizer
 
     public function __construct(
         private readonly ProductConfigRepository $productConfigRepository,
+        private readonly TpProductCustomizationFieldRepository $customizationFieldRepository,
         private readonly ColorAttributeProvider $colorAttributeProvider,
         private readonly CombinationConfigRepository $combinationConfigRepository,
         private readonly PriceCalculator $priceCalculator,
@@ -63,6 +65,8 @@ class AddToCartCustomizer
             return;
         }
 
+        $fieldIds = $this->getFieldIds($idProduct);
+
         $width = (string) Tools::getValue('tpp_width');
         $height = (string) Tools::getValue('tpp_height');
         $cordSide = (string) Tools::getValue('tpp_cord_side');
@@ -70,14 +74,14 @@ class AddToCartCustomizer
         $mechanismColor = (int) Tools::getValue('tpp_mechanism_color');
         $rollDirection = (string) Tools::getValue('tpp_roll_direction');
         $hasDimensions = $width !== '' && $height !== '';
-        $hasCordSide = $cordSide !== '' && $config->getIdCustomizationFieldCordSide() !== null;
+        $hasCordSide = $cordSide !== '' && isset($fieldIds[CustomizationFieldRegistry::SLUG_CORD_SIDE]);
         $hasCassette = in_array($cassette, self::CASSETTE_VALUES, true)
-            && $config->getIdCustomizationFieldCassette() !== null;
+            && isset($fieldIds[CustomizationFieldRegistry::SLUG_CASSETTE]);
 
         $mechanismColorName = null;
         if ($mechanismColor > 0
             && $config->getIdAttributeGroupMechanismColor() !== null
-            && $config->getIdCustomizationFieldMechanismColor() !== null
+            && isset($fieldIds[CustomizationFieldRegistry::SLUG_MECHANISM_COLOR])
         ) {
             $mechanismColorName = $this->resolveColorName(
                 (int) $config->getIdAttributeGroupMechanismColor(),
@@ -87,7 +91,7 @@ class AddToCartCustomizer
         $hasMechanismColor = $mechanismColorName !== null;
 
         $hasRollDirection = in_array($rollDirection, self::ROLL_DIRECTION_VALUES, true)
-            && $config->getIdCustomizationFieldRollDirection() !== null;
+            && isset($fieldIds[CustomizationFieldRegistry::SLUG_ROLL_DIRECTION]);
 
         if (!$hasDimensions && !$hasCordSide && !$hasCassette && !$hasMechanismColor && !$hasRollDirection) {
             return;
@@ -104,31 +108,31 @@ class AddToCartCustomizer
         $idCustomization = false;
 
         if ($hasDimensions) {
-            $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldWidth(), Product::CUSTOMIZE_TEXTFIELD, $width, true);
-            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldHeight(), Product::CUSTOMIZE_TEXTFIELD, $height, true);
+            $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_WIDTH], Product::CUSTOMIZE_TEXTFIELD, $width, true);
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_HEIGHT], Product::CUSTOMIZE_TEXTFIELD, $height, true);
         }
 
         if ($hasCordSide) {
-            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldCordSide(), Product::CUSTOMIZE_TEXTFIELD, $cordSide, true);
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_CORD_SIDE], Product::CUSTOMIZE_TEXTFIELD, $cordSide, true);
         }
 
         if ($hasCassette) {
-            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldCassette(), Product::CUSTOMIZE_TEXTFIELD, $cassette, true);
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_CASSETTE], Product::CUSTOMIZE_TEXTFIELD, $cassette, true);
         }
 
         if ($hasMechanismColor) {
-            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldMechanismColor(), Product::CUSTOMIZE_TEXTFIELD, $mechanismColorName, true);
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_MECHANISM_COLOR], Product::CUSTOMIZE_TEXTFIELD, $mechanismColorName, true);
         }
 
         if ($hasRollDirection) {
-            $idCustomization = $cart->addTextFieldToProduct($idProduct, (int) $config->getIdCustomizationFieldRollDirection(), Product::CUSTOMIZE_TEXTFIELD, $rollDirection, true);
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_ROLL_DIRECTION], Product::CUSTOMIZE_TEXTFIELD, $rollDirection, true);
         }
 
         if ($idCustomization === false) {
             return;
         }
 
-        $this->stampPrices((int) $idCustomization, $config, $idProductAttribute, [
+        $this->stampPrices((int) $idCustomization, $config, $fieldIds, $idProductAttribute, [
             'width' => $width,
             'height' => $height,
             'hasDimensions' => $hasDimensions,
@@ -143,16 +147,40 @@ class AddToCartCustomizer
     }
 
     /**
+     * Reads the module's provisioned `customization_field` ids for
+     * $idProduct directly through {@see TpProductCustomizationFieldRepository}
+     * (a read-only consumer, not a layering violation — {@see CustomizationFieldRegistry}
+     * remains the sole writer), reduced to a slug => id map mirroring
+     * `CustomizationFieldRegistry::getStoredFieldIds()`'s shape. Absent
+     * slugs are simply missing keys — callers use `isset()`, not a null
+     * check, to match the child table's "no row means not provisioned"
+     * semantics.
+     *
+     * @return array<string, int>
+     */
+    private function getFieldIds(int $idProduct): array
+    {
+        $fieldIds = [];
+        foreach ($this->customizationFieldRepository->findByProductId($idProduct) as $row) {
+            $fieldIds[$row->getFieldSlug()] = $row->getIdCustomizationField();
+        }
+
+        return $fieldIds;
+    }
+
+    /**
      * Prices and stamps every row this request just wrote, then zeroes any
      * row this module owns on the same $idCustomization that was not
      * re-written this request (deselected cassette on a re-submit — see
      * .claude/docs/specs/add-to-cart-pricing.md §5.4).
      *
+     * @param array<string, int> $fieldIds slug => id, see {@see self::getFieldIds()}
      * @param array{width: string, height: string, hasDimensions: bool, hasCordSide: bool, hasCassette: bool, cassetteSelected: bool, hasMechanismColor: bool, hasRollDirection: bool} $submitted
      */
     private function stampPrices(
         int $idCustomization,
         TpProductConfig $config,
+        array $fieldIds,
         int $idProductAttribute,
         array $submitted
     ): void {
@@ -176,8 +204,8 @@ class AddToCartCustomizer
         $writtenIndexes = [];
 
         if ($submitted['hasDimensions']) {
-            $idWidth = (int) $config->getIdCustomizationFieldWidth();
-            $idHeight = (int) $config->getIdCustomizationFieldHeight();
+            $idWidth = $fieldIds[CustomizationFieldRegistry::SLUG_WIDTH];
+            $idHeight = $fieldIds[CustomizationFieldRegistry::SLUG_HEIGHT];
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idWidth, $breakdown['rollerPrice']);
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idHeight, 0.0);
             $writtenIndexes[] = $idWidth;
@@ -185,38 +213,36 @@ class AddToCartCustomizer
         }
 
         if ($submitted['hasCordSide']) {
-            $idCordSide = (int) $config->getIdCustomizationFieldCordSide();
+            $idCordSide = $fieldIds[CustomizationFieldRegistry::SLUG_CORD_SIDE];
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idCordSide, 0.0);
             $writtenIndexes[] = $idCordSide;
         }
 
         if ($submitted['hasCassette']) {
-            $idCassette = (int) $config->getIdCustomizationFieldCassette();
+            $idCassette = $fieldIds[CustomizationFieldRegistry::SLUG_CASSETTE];
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idCassette, $breakdown['cassettePrice']);
             $writtenIndexes[] = $idCassette;
         }
 
         if ($submitted['hasMechanismColor']) {
-            $idMechanismColor = (int) $config->getIdCustomizationFieldMechanismColor();
+            $idMechanismColor = $fieldIds[CustomizationFieldRegistry::SLUG_MECHANISM_COLOR];
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idMechanismColor, 0.0);
             $writtenIndexes[] = $idMechanismColor;
         }
 
         if ($submitted['hasRollDirection']) {
-            $idRollDirection = (int) $config->getIdCustomizationFieldRollDirection();
+            $idRollDirection = $fieldIds[CustomizationFieldRegistry::SLUG_ROLL_DIRECTION];
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idRollDirection, 0.0);
             $writtenIndexes[] = $idRollDirection;
         }
 
-        $moduleFieldIndexes = array_values(array_filter([
-            $config->getIdCustomizationFieldWidth(),
-            $config->getIdCustomizationFieldHeight(),
-            $config->getIdCustomizationFieldCordSide(),
-            $config->getIdCustomizationFieldCassette(),
-            $config->getIdCustomizationFieldMechanismColor(),
-            $config->getIdCustomizationFieldRollDirection(),
-        ], static fn (?int $id): bool => $id !== null));
-        $moduleFieldIndexes = array_map('intval', $moduleFieldIndexes);
+        // The set of module-owned indexes PriceWriter::resetStaleRows() may
+        // touch: every field id this product has provisioned (not just the
+        // ones written this request), keyed by index instead of slug.
+        // array_filter() is defensive — $fieldIds only ever holds
+        // provisioned, non-null/non-zero ids by construction (absence of a
+        // row means "not provisioned" — see TpProductCustomizationFieldRepository).
+        $moduleFieldIndexes = array_values(array_filter($fieldIds));
 
         $this->priceWriter->resetStaleRows($idCustomization, $moduleFieldIndexes, $writtenIndexes);
     }

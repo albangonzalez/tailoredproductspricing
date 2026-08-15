@@ -87,83 +87,16 @@ class TpProductConfig
      * product. Unlike the cassette price and the mechanism-color group, this
      * choice carries no value of its own, so it gets an explicit flag column
      * rather than overloading the nullness of a settings column — and never
-     * the nullness of {@see self::$idCustomizationFieldRollDirection}, which
-     * is provisioning state, not merchant intent.
+     * the nullness of the module's provisioned `customization_field` id for
+     * this slug (now recorded in `tp_product_customization_field`, see
+     * {@see \PrestaShop\Module\TailoredProducts\Service\CustomizationFieldRegistry}),
+     * which is provisioning state, not merchant intent.
      *
      * @var bool
      *
      * @ORM\Column(name="roll_direction_enabled", type="boolean", options={"unsigned"=true, "default"=0})
      */
     private $rollDirectionEnabled = false;
-
-    /**
-     * Id of the module-provisioned "Width" `customization_field` row
-     * ({@see \PrestaShop\Module\TailoredProducts\Service\CustomizationFieldRegistry}).
-     * Null when the module is enabled but provisioning has not (yet)
-     * recorded an id, or after deprovisioning.
-     *
-     * @var int|null
-     *
-     * @ORM\Column(name="id_customization_field_width", type="integer", options={"unsigned"=true}, nullable=true)
-     */
-    private $idCustomizationFieldWidth;
-
-    /**
-     * Id of the module-provisioned "Height" `customization_field` row.
-     * See {@see self::$idCustomizationFieldWidth}.
-     *
-     * @var int|null
-     *
-     * @ORM\Column(name="id_customization_field_height", type="integer", options={"unsigned"=true}, nullable=true)
-     */
-    private $idCustomizationFieldHeight;
-
-    /**
-     * Id of the module-provisioned "Cord side" `customization_field` row.
-     * See {@see self::$idCustomizationFieldWidth}.
-     *
-     * @var int|null
-     *
-     * @ORM\Column(name="id_customization_field_cord_side", type="integer", options={"unsigned"=true}, nullable=true)
-     */
-    private $idCustomizationFieldCordSide;
-
-    /**
-     * Id of the module-provisioned "Cassette" `customization_field` row.
-     * Unlike the width/height/cord-side ids, this one is null whenever the
-     * cassette choice is off for the product (i.e. whenever
-     * {@see self::$cassettePricePerMeter} is null).
-     * See {@see self::$idCustomizationFieldWidth}.
-     *
-     * @var int|null
-     *
-     * @ORM\Column(name="id_customization_field_cassette", type="integer", options={"unsigned"=true}, nullable=true)
-     */
-    private $idCustomizationFieldCassette;
-
-    /**
-     * Id of the module-provisioned "Mechanism color" `customization_field`
-     * row. Null whenever the mechanism-color choice is off for the product
-     * (i.e. whenever {@see self::$idAttributeGroupMechanismColor} is null).
-     * See {@see self::$idCustomizationFieldWidth}.
-     *
-     * @var int|null
-     *
-     * @ORM\Column(name="id_customization_field_mechanism_color", type="integer", options={"unsigned"=true}, nullable=true)
-     */
-    private $idCustomizationFieldMechanismColor;
-
-    /**
-     * Id of the module-provisioned "Roll direction" `customization_field` row.
-     * Null whenever the roll-direction choice is off for the product (i.e.
-     * whenever {@see self::$rollDirectionEnabled} is false).
-     * See {@see self::$idCustomizationFieldWidth}.
-     *
-     * @var int|null
-     *
-     * @ORM\Column(name="id_customization_field_roll_direction", type="integer", options={"unsigned"=true}, nullable=true)
-     */
-    private $idCustomizationFieldRollDirection;
 
     public function __construct(int $idProduct)
     {
@@ -235,42 +168,6 @@ class TpProductConfig
         return $this;
     }
 
-    public function getIdCustomizationFieldWidth(): ?int
-    {
-        return $this->idCustomizationFieldWidth;
-    }
-
-    public function setIdCustomizationFieldWidth(?int $idCustomizationFieldWidth): self
-    {
-        $this->idCustomizationFieldWidth = $idCustomizationFieldWidth;
-
-        return $this;
-    }
-
-    public function getIdCustomizationFieldHeight(): ?int
-    {
-        return $this->idCustomizationFieldHeight;
-    }
-
-    public function setIdCustomizationFieldHeight(?int $idCustomizationFieldHeight): self
-    {
-        $this->idCustomizationFieldHeight = $idCustomizationFieldHeight;
-
-        return $this;
-    }
-
-    public function getIdCustomizationFieldCordSide(): ?int
-    {
-        return $this->idCustomizationFieldCordSide;
-    }
-
-    public function setIdCustomizationFieldCordSide(?int $idCustomizationFieldCordSide): self
-    {
-        $this->idCustomizationFieldCordSide = $idCustomizationFieldCordSide;
-
-        return $this;
-    }
-
     public function getCassettePricePerMeter(): ?string
     {
         return $this->cassettePricePerMeter;
@@ -279,18 +176,6 @@ class TpProductConfig
     public function setCassettePricePerMeter(?string $cassettePricePerMeter): self
     {
         $this->cassettePricePerMeter = $cassettePricePerMeter;
-
-        return $this;
-    }
-
-    public function getIdCustomizationFieldCassette(): ?int
-    {
-        return $this->idCustomizationFieldCassette;
-    }
-
-    public function setIdCustomizationFieldCassette(?int $idCustomizationFieldCassette): self
-    {
-        $this->idCustomizationFieldCassette = $idCustomizationFieldCassette;
 
         return $this;
     }
@@ -307,18 +192,6 @@ class TpProductConfig
         return $this;
     }
 
-    public function getIdCustomizationFieldMechanismColor(): ?int
-    {
-        return $this->idCustomizationFieldMechanismColor;
-    }
-
-    public function setIdCustomizationFieldMechanismColor(?int $idCustomizationFieldMechanismColor): self
-    {
-        $this->idCustomizationFieldMechanismColor = $idCustomizationFieldMechanismColor;
-
-        return $this;
-    }
-
     public function isRollDirectionEnabled(): bool
     {
         return $this->rollDirectionEnabled;
@@ -327,18 +200,6 @@ class TpProductConfig
     public function setRollDirectionEnabled(bool $rollDirectionEnabled): self
     {
         $this->rollDirectionEnabled = $rollDirectionEnabled;
-
-        return $this;
-    }
-
-    public function getIdCustomizationFieldRollDirection(): ?int
-    {
-        return $this->idCustomizationFieldRollDirection;
-    }
-
-    public function setIdCustomizationFieldRollDirection(?int $idCustomizationFieldRollDirection): self
-    {
-        $this->idCustomizationFieldRollDirection = $idCustomizationFieldRollDirection;
 
         return $this;
     }
