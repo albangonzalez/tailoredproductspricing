@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Install;
+namespace PrestaShop\Module\TailoredProducts\Install;
 
-use PrestaShop\Module\TailoredProductsPricing\Sql\SqlQueries;
+use PrestaShop\Module\TailoredProducts\Sql\SqlQueries;
 
 final class Installer
 {
@@ -88,7 +88,7 @@ final class Installer
 
         $softDeleted = $db->execute(
             'UPDATE `' . $prefix . 'customization_field` cf
-             INNER JOIN `' . $prefix . 'tpp_product_config` c ON cf.`id_product` = c.`id_product`
+             INNER JOIN `' . $prefix . 'tp_product_config` c ON cf.`id_product` = c.`id_product`
              SET cf.`is_deleted` = 1
              WHERE cf.`is_deleted` = 0
              AND cf.`id_customization_field` IN (c.`id_customization_field_width`, c.`id_customization_field_height`, c.`id_customization_field_cord_side`, c.`id_customization_field_cassette`, c.`id_customization_field_mechanism_color`, c.`id_customization_field_roll_direction`)'
@@ -111,7 +111,7 @@ final class Installer
     /**
      * @param array<string, int> $resetData
      *
-     * Applies $resetData columns via a set-based UPDATE joined on tpp_product_config,
+     * Applies $resetData columns via a set-based UPDATE joined on tp_product_config,
      * scoped to a single table (product or product_shop).
      */
     private function resetProductCustomizations(\Db $db, string $prefix, string $table, array $resetData): bool
@@ -124,7 +124,7 @@ final class Installer
 
         return $db->execute(
             'UPDATE `' . $prefix . $table . '` `' . $table . '`
-             INNER JOIN `' . $prefix . 'tpp_product_config` c ON c.`id_product` = `' . $table . '`.`id_product`
+             INNER JOIN `' . $prefix . 'tp_product_config` c ON c.`id_product` = `' . $table . '`.`id_product`
              SET ' . $set
         );
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Form\Type;
+namespace PrestaShop\Module\TailoredProducts\Form\Type;
 
 use PrestaShopBundle\Form\Admin\Type\DisablingSwitchType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
@@ -20,7 +20,7 @@ class TailoredProductsSettingsType extends AbstractType
     private const CASSETTE_FIELD_CLASS = 'js-tpp-cassette-field';
     private const CASSETTE_FIELD_SELECTOR = '.js-tpp-cassette-field';
     private const FORM_THEME = '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig';
-    private const DOMAIN = 'Modules.Tailoredproductspricing.Admin';
+    private const DOMAIN = 'Modules.Tailoredproducts.Admin';
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

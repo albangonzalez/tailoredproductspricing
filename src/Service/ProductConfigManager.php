@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
+use PrestaShop\Module\TailoredProducts\Entity\TpProductConfig;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 
 /**
- * Owns all `tpp_product_config` business logic: unit allow-list validation,
+ * Owns all `tp_product_config` business logic: unit allow-list validation,
  * numeric normalization, find-or-create/delete, and entity <-> array
  * mapping for the product Details-tab hook flow. Pulled out of the module
  * class so the hook methods stay thin delegations.
@@ -75,7 +75,7 @@ final class ProductConfigManager
             ? $tppSettings['tpp_unit']
             : self::DEFAULT_UNIT;
 
-        $config = $this->repository->findByProductId($idProduct) ?? new TppProductConfig($idProduct);
+        $config = $this->repository->findByProductId($idProduct) ?? new TpProductConfig($idProduct);
 
         $config
             ->setMinWidth($this->nullableDecimal($tppSettings['tpp_min_width'] ?? null))
@@ -87,7 +87,7 @@ final class ProductConfigManager
             ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings))
             ->setRollDirectionEnabled((bool) ($tppSettings['tpp_roll_direction_enabled'] ?? false));
 
-        // Persist the base settings first so the `tpp_product_config` row
+        // Persist the base settings first so the `tp_product_config` row
         // exists for the registry to record the resolved field ids onto.
         $this->repository->save($config);
 

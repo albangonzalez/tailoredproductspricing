@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
 use Cart;
 use Context;
-use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
-use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
+use PrestaShop\Module\TailoredProducts\Entity\TpProductConfig;
+use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 use PrestaShopException;
 use Product;
 use Tools;
@@ -22,7 +22,7 @@ use Validate;
  * rows, and injects `id_customization` into `$_POST` so core's own
  * `CartController` picks it up natively.
  *
- * See .claude/docs/specs/tailoredproductspricing-add-to-cart-customization.md,
+ * See .claude/docs/specs/tailoredproducts-add-to-cart-customization.md,
  * Addendum B.3/C, and .claude/docs/specs/mechanism-color-choice.md §3.10, for
  * the full design. This step deliberately persists the raw submitted
  * dimensions, cassette choice and roll direction with no bounds validation
@@ -152,7 +152,7 @@ class AddToCartCustomizer
      */
     private function stampPrices(
         int $idCustomization,
-        TppProductConfig $config,
+        TpProductConfig $config,
         int $idProductAttribute,
         array $submitted
     ): void {

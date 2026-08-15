@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Repository;
+namespace PrestaShop\Module\TailoredProducts\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppCombinationConfig;
+use PrestaShop\Module\TailoredProducts\Entity\TpCombinationConfig;
 
 /**
- * Doctrine repository for `tpp_combination_config`, built by the
+ * Doctrine repository for `tp_combination_config`, built by the
  * `doctrine.orm.default_entity_manager`'s `getRepository` factory (see
  * config/services.yml). Supersedes the previous raw-SQL
  * `Adapter\CombinationConfigRepository`.
  */
 class CombinationConfigRepository extends EntityRepository
 {
-    public function findByPk(int $idProductAttribute): ?TppCombinationConfig
+    public function findByPk(int $idProductAttribute): ?TpCombinationConfig
     {
         return $this->find($idProductAttribute);
     }
@@ -37,7 +37,7 @@ class CombinationConfigRepository extends EntityRepository
         $config = $this->findByPk($idProductAttribute);
 
         if ($config === null) {
-            $config = new TppCombinationConfig($idProductAttribute);
+            $config = new TpCombinationConfig($idProductAttribute);
         }
 
         $config->setPricePerSqm((string) $pricePerSqm);

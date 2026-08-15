@@ -4,33 +4,33 @@ services:
         autoconfigure: false
         public: true
 
-    PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider:
+    PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
-    PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider: ~
+    PrestaShop\Module\TailoredProducts\Service\DimensionsFieldsProvider: ~
         # autowires ProductConfigRepository by type
 
-    PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer: ~
+    PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer: ~
         # autowires ProductConfigRepository by type
 
-    PrestaShop\Module\TailoredProductsPricing\Service\ProductChoicesProvider: ~
+    PrestaShop\Module\TailoredProducts\Service\ProductChoicesProvider: ~
         # autowires ProductConfigRepository by type
 
-    PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
-        class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository
+    PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TpProductConfig
 
-    PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository:
-        class: PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository
+    PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProductsPricing\Entity\TppCombinationConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TpCombinationConfig
 
-    PrestaShop\Module\TailoredProductsPricing\Service\PriceWriter:
+    PrestaShop\Module\TailoredProducts\Service\PriceWriter:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
-    PrestaShop\Module\TailoredProductsPricing\Service\PriceCalculator: ~
+    PrestaShop\Module\TailoredProducts\Service\PriceCalculator: ~

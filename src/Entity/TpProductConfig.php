@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Entity;
+namespace PrestaShop\Module\TailoredProducts\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Doctrine entity mirroring `tpp_product_config` (one row per product with
+ * Doctrine entity mirroring `tp_product_config` (one row per product with
  * Tailored Products Pricing enabled). Natural, application-assigned PK
  * (`id_product`) — no GeneratedValue.
  *
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository")
+ * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository")
  */
-class TppProductConfig
+class TpProductConfig
 {
     /**
      * @var int
@@ -99,7 +98,7 @@ class TppProductConfig
 
     /**
      * Id of the module-provisioned "Width" `customization_field` row
-     * ({@see \PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry}).
+     * ({@see \PrestaShop\Module\TailoredProducts\Service\CustomizationFieldRegistry}).
      * Null when the module is enabled but provisioning has not (yet)
      * recorded an id, or after deprovisioning.
      *

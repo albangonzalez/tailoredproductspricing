@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
+use PrestaShop\Module\TailoredProducts\Entity\TpProductConfig;
 use PrestaShopBundle\Utils\FloatParser;
 
 /**
@@ -24,7 +24,7 @@ class PriceCalculator
      * @return array{rollerPrice: float, cassettePrice: float}
      */
     public function calculate(
-        TppProductConfig $config,
+        TpProductConfig $config,
         float $pricePerSqm,
         string $rawWidth,
         string $rawHeight,
