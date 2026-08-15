@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
 use Doctrine\DBAL\Connection;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 
 /**
  * Resolves whether Tailored Products Pricing is enabled for the product

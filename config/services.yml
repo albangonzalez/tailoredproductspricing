@@ -5,43 +5,43 @@ services:
         public: true
 
     # Adapters (read-only access to core-owned tables)
-    PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider:
+    PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
     # Form modifiers
-    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier:
+    PrestaShop\Module\TailoredProducts\Form\Modifier\ProductFormModifier:
         arguments:
             $formBuilderModifier: '@form.form_builder_modifier'
             $contextLangId: "@=service('prestashop.adapter.legacy.context').getContext().language.id"
             $contextShopId: "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
 
-    PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier: ~
+    PrestaShop\Module\TailoredProducts\Form\Modifier\CombinationFormModifier: ~
         # autowires CombinationEnablementChecker by type
 
     # Services
-    PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager:
+    PrestaShop\Module\TailoredProducts\Service\ProductConfigManager:
         arguments:
             $contextShopId: "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
 
-    PrestaShop\Module\TailoredProductsPricing\Service\CombinationEnablementChecker:
+    PrestaShop\Module\TailoredProducts\Service\CombinationEnablementChecker:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
-    PrestaShop\Module\TailoredProductsPricing\Service\CustomizationFieldRegistry:
+    PrestaShop\Module\TailoredProducts\Service\CustomizationFieldRegistry:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
             $translator: '@translator'
 
     # Repositories
-    PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository:
-        class: PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository
+    PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TppProductConfig
 
-    PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository:
-        class: PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository
+    PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProductsPricing\Entity\TppCombinationConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TppCombinationConfig

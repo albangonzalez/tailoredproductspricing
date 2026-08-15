@@ -1,5 +1,5 @@
 {
-    "name": "pentalux/tailoredproductspricing",
+    "name": "pentalux/tailoredproducts",
     "description": "Let customers define custom dimensions (width × height) for each product — price is calculated automatically.",
     "type": "prestashop-module",
     "authors": [
@@ -9,7 +9,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "PrestaShop\\Module\\TailoredProductsPricing\\": "src/"
+            "PrestaShop\\Module\\TailoredProducts\\": "src/"
         }
     },
     "config": {

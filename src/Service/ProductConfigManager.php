@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
+use PrestaShop\Module\TailoredProducts\Entity\TppProductConfig;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 
 /**
  * Owns all `tpp_product_config` business logic: unit allow-list validation,

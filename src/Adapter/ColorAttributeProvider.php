@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Adapter;
+namespace PrestaShop\Module\TailoredProducts\Adapter;
 
 use Doctrine\DBAL\Connection;
 

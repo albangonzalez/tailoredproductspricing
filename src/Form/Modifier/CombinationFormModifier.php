@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Form\Modifier;
+namespace PrestaShop\Module\TailoredProducts\Form\Modifier;
 
-use PrestaShop\Module\TailoredProductsPricing\Form\Type\PricePerSqmType;
-use PrestaShop\Module\TailoredProductsPricing\Service\CombinationEnablementChecker;
+use PrestaShop\Module\TailoredProducts\Form\Type\PricePerSqmType;
+use PrestaShop\Module\TailoredProducts\Service\CombinationEnablementChecker;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**

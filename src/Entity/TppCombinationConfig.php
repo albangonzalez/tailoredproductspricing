@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Entity;
+namespace PrestaShop\Module\TailoredProducts\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * PK (`id_product_attribute`) — no GeneratedValue.
  *
  * @ORM\Table()
- * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository")
+ * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository")
  */
 class TppCombinationConfig
 {

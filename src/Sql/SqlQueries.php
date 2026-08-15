@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Sql;
+namespace PrestaShop\Module\TailoredProducts\Sql;
 
 final class SqlQueries
 {

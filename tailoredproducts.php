@@ -1,14 +1,14 @@
 <?php
 
-use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\CombinationFormModifier;
-use PrestaShop\Module\TailoredProductsPricing\Form\Modifier\ProductFormModifier;
-use PrestaShop\Module\TailoredProductsPricing\Install\Installer;
-use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
-use PrestaShop\Module\TailoredProductsPricing\Service\AddToCartCustomizer;
-use PrestaShop\Module\TailoredProductsPricing\Service\DimensionsFieldsProvider;
-use PrestaShop\Module\TailoredProductsPricing\Service\ProductChoicesProvider;
-use PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager;
+use PrestaShop\Module\TailoredProducts\Form\Modifier\CombinationFormModifier;
+use PrestaShop\Module\TailoredProducts\Form\Modifier\ProductFormModifier;
+use PrestaShop\Module\TailoredProducts\Install\Installer;
+use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer;
+use PrestaShop\Module\TailoredProducts\Service\DimensionsFieldsProvider;
+use PrestaShop\Module\TailoredProducts\Service\ProductChoicesProvider;
+use PrestaShop\Module\TailoredProducts\Service\ProductConfigManager;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -16,13 +16,13 @@ if (!defined('_PS_VERSION_')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-class TailoredProductsPricing extends Module
+class TailoredProducts extends Module
 {
     const FORM_THEME = '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig';
 
     public function __construct()
     {
-        $this->name = 'tailoredproductspricing';
+        $this->name = 'tailoredproducts';
         $this->tab = 'pricing_promotion';
         $this->version = '1.0.0';
         $this->author = 'Pentalux';
@@ -31,11 +31,11 @@ class TailoredProductsPricing extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->trans('Tailored Products Pricing', [], 'Modules.Tailoredproductspricing.Admin');
+        $this->displayName = $this->trans('Tailored Products', [], 'Modules.Tailoredproducts.Admin');
         $this->description = $this->trans(
             'Let customers define custom dimensions (width × height) for each product — price is calculated automatically.',
             [],
-            'Modules.Tailoredproductspricing.Admin'
+            'Modules.Tailoredproducts.Admin'
         );
 
         $this->ps_versions_compliancy = ['min' => '9.0.0', 'max' => _PS_VERSION_];
@@ -166,13 +166,13 @@ class TailoredProductsPricing extends Module
         }
 
         $this->context->controller->registerStylesheet(
-            'tailoredproductspricing-product-customization',
+            'tailoredproducts-product-customization',
             'modules/' . $this->name . '/views/css/product-customization.css',
             ['media' => 'all', 'priority' => 200]
         );
 
         $this->context->controller->registerJavascript(
-            'tailoredproductspricing-dimensions-price',
+            'tailoredproducts-dimensions-price',
             'modules/' . $this->name . '/views/js/dimensions-price.js',
             ['position' => 'bottom', 'priority' => 200]
         );

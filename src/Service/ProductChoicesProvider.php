@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 
 /**
  * Pure data/gating service for the FO `displayProductCustomizationBottom`

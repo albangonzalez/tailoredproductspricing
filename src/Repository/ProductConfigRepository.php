@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Repository;
+namespace PrestaShop\Module\TailoredProducts\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
+use PrestaShop\Module\TailoredProducts\Entity\TppProductConfig;
 
 /**
  * Doctrine repository for `tpp_product_config`, built by the
  * `doctrine.orm.default_entity_manager`'s `getRepository` factory (see
  * config/services.yml). It cannot receive custom constructor dependencies —
- * business logic belongs to {@see \PrestaShop\Module\TailoredProductsPricing\Service\ProductConfigManager}.
+ * business logic belongs to {@see \PrestaShop\Module\TailoredProducts\Service\ProductConfigManager}.
  */
 class ProductConfigRepository extends EntityRepository
 {

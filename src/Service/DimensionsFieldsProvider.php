@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 
 /**
  * Pure data/gating service for the front-office dimensions form

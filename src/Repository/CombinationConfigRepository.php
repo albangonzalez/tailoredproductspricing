@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Repository;
+namespace PrestaShop\Module\TailoredProducts\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppCombinationConfig;
+use PrestaShop\Module\TailoredProducts\Entity\TppCombinationConfig;
 
 /**
  * Doctrine repository for `tpp_combination_config`, built by the

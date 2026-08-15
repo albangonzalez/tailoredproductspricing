@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Form\Modifier;
+namespace PrestaShop\Module\TailoredProducts\Form\Modifier;
 
-use PrestaShop\Module\TailoredProductsPricing\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProductsPricing\Form\Type\TailoredProductsSettingsType;
+use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
+use PrestaShop\Module\TailoredProducts\Form\Type\TailoredProductsSettingsType;
 use PrestaShopBundle\Form\FormBuilderModifier;
 use Symfony\Component\Form\FormBuilderInterface;
 

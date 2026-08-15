@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
 use Doctrine\DBAL\Connection;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -30,7 +30,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class CustomizationFieldRegistry
 {
     private const TYPE_TEXTFIELD = 1; // Product::CUSTOMIZE_TEXTFIELD
-    private const TRANSLATION_DOMAIN = 'Modules.Tailoredproductspricing.Admin';
+    private const TRANSLATION_DOMAIN = 'Modules.Tailoredproducts.Admin';
 
     /**
      * Slug => `tpp_product_config` column holding the field id. Keyed map

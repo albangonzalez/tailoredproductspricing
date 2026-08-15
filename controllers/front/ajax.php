@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use PrestaShop\Module\TailoredProductsPricing\Repository\CombinationConfigRepository;
-use PrestaShop\Module\TailoredProductsPricing\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 use PrestaShopBundle\Utils\FloatParser;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class TailoredProductsPricingAjaxModuleFrontController extends ModuleFrontController
+class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
 {
     private const METERS_PER_UNIT = [
         'cm' => 100.0,

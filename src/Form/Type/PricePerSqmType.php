@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Form\Type;
+namespace PrestaShop\Module\TailoredProducts\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -25,7 +25,7 @@ final class PricePerSqmType extends AbstractType
     {
         $resolver->setDefaults([
             'label' => 'Price per m²',
-            'translation_domain' => 'Modules.Tailoredproductspricing.Admin',
+            'translation_domain' => 'Modules.Tailoredproducts.Admin',
             'scale' => 2,
             'required' => false,
             'attr' => [

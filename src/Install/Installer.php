@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Install;
+namespace PrestaShop\Module\TailoredProducts\Install;
 
-use PrestaShop\Module\TailoredProductsPricing\Sql\SqlQueries;
+use PrestaShop\Module\TailoredProducts\Sql\SqlQueries;
 
 final class Installer
 {

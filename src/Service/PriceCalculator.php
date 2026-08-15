@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\TailoredProductsPricing\Service;
+namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProductsPricing\Entity\TppProductConfig;
+use PrestaShop\Module\TailoredProducts\Entity\TppProductConfig;
 use PrestaShopBundle\Utils\FloatParser;
 
 /**

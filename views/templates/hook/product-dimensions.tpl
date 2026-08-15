@@ -6,12 +6,12 @@
     <fieldset class="tpp-dimensions">
         <div class="tpp-dimensions-label">
             <label class="form-label">
-                {l s='Dimensions' d='Modules.Tailoredproductspricing.Shop'}
+                {l s='Dimensions' d='Modules.Tailoredproducts.Shop'}
             </label>
         </div>
         <div class="form-group tpp-dimension-field">
             <label for="tpp_width">
-                {l s='Width' d='Modules.Tailoredproductspricing.Shop'} ({$unit|escape:'html'})
+                {l s='Width' d='Modules.Tailoredproducts.Shop'} ({$unit|escape:'html'})
             </label>
             <input
                 type="number"
@@ -25,7 +25,7 @@
         </div>
         <div class="form-group tpp-dimension-field">
             <label for="tpp_height">
-                {l s='Height' d='Modules.Tailoredproductspricing.Shop'} ({$unit|escape:'html'})
+                {l s='Height' d='Modules.Tailoredproducts.Shop'} ({$unit|escape:'html'})
             </label>
             <input
                 type="number"
