@@ -33,7 +33,7 @@ final class CustomizationFieldRegistry
     private const TRANSLATION_DOMAIN = 'Modules.Tailoredproducts.Admin';
 
     /**
-     * Slug => `tpp_product_config` column holding the field id. Keyed map
+     * Slug => `tp_product_config` column holding the field id. Keyed map
      * instead of a positional tuple: a five-element positional array plus a
      * five-argument setter is a silent-transposition bug waiting to happen.
      */
@@ -63,7 +63,7 @@ final class CustomizationFieldRegistry
      * Ensures the three unconditional `is_module=1` Width/Height/Cord-side
      * fields exist for $idProduct, plus one field per {@see self::OPTIONAL_FIELD_LABELS}
      * slug gated on `$optionalFields[$slug]` (missing key reads as false).
-     * Idempotent: reuses the ids already stored on `tpp_product_config` when
+     * Idempotent: reuses the ids already stored on `tp_product_config` when
      * the referenced rows still exist and are live; otherwise (re)provisions
      * a fresh field. A false gate soft-deletes any stored field for that slot
      * instead.
@@ -136,7 +136,7 @@ final class CustomizationFieldRegistry
     {
         $row = $this->connection->createQueryBuilder()
             ->select(...array_values(self::FIELD_COLUMNS))
-            ->from(_DB_PREFIX_ . 'tpp_product_config')
+            ->from(_DB_PREFIX_ . 'tp_product_config')
             ->where('id_product = :idProduct')
             ->setParameter('idProduct', $idProduct)
             ->executeQuery()
@@ -164,7 +164,7 @@ final class CustomizationFieldRegistry
             $data[$column] = $ids[$slug] ?? null;
         }
 
-        $this->connection->update(_DB_PREFIX_ . 'tpp_product_config', $data, ['id_product' => $idProduct]);
+        $this->connection->update(_DB_PREFIX_ . 'tp_product_config', $data, ['id_product' => $idProduct]);
     }
 
     /**

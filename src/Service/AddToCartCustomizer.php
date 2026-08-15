@@ -7,7 +7,7 @@ namespace PrestaShop\Module\TailoredProducts\Service;
 use Cart;
 use Context;
 use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProducts\Entity\TppProductConfig;
+use PrestaShop\Module\TailoredProducts\Entity\TpProductConfig;
 use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
 use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 use PrestaShopException;
@@ -152,7 +152,7 @@ class AddToCartCustomizer
      */
     private function stampPrices(
         int $idCustomization,
-        TppProductConfig $config,
+        TpProductConfig $config,
         int $idProductAttribute,
         array $submitted
     ): void {

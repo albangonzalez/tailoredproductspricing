@@ -7,14 +7,13 @@ namespace PrestaShop\Module\TailoredProducts\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Doctrine entity mirroring `tpp_product_config` (one row per product with
+ * Doctrine entity mirroring `tp_product_config` (one row per product with
  * Tailored Products Pricing enabled). Natural, application-assigned PK
  * (`id_product`) — no GeneratedValue.
  *
- * @ORM\Table()
  * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository")
  */
-class TppProductConfig
+class TpProductConfig
 {
     /**
      * @var int

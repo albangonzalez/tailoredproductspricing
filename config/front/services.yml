@@ -21,13 +21,13 @@ services:
         class: PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProducts\Entity\TppProductConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TpProductConfig
 
     PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository:
         class: PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProducts\Entity\TppCombinationConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TpCombinationConfig
 
     PrestaShop\Module\TailoredProducts\Service\PriceWriter:
         arguments:
