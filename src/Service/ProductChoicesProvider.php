@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PrestaShop\Module\TailoredProducts\Service;
 
 use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 
 /**
  * Pure data/gating service for the FO `displayProductCustomizationBottom`
@@ -15,7 +15,7 @@ use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
 final class ProductChoicesProvider
 {
     public function __construct(
-        private readonly ProductConfigRepository $productConfigRepository,
+        private readonly TailoredProductSettingsRepository $productConfigRepository,
         private readonly ColorAttributeProvider $colorAttributeProvider,
     ) {
     }

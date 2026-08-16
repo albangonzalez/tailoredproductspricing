@@ -6,8 +6,8 @@ namespace PrestaShop\Module\TailoredProducts\Service;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use PrestaShop\Module\TailoredProducts\Entity\TpProductCustomizationField;
-use PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository;
+use PrestaShop\Module\TailoredProducts\Entity\TailoredProductCustomizationField;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductCustomizationFieldRepository;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -27,14 +27,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * persistence-boundary adapter for the core tables — confined to this single
  * class, per the module layering rule.
  *
- * The module's own child table, `tp_product_customization_field` (which
- * records which `customization_field` id was provisioned for which
+ * The module's own child table, `tailored_product_customization_field`
+ * (which records which `customization_field` id was provisioned for which
  * (product, slug)), is a Doctrine entity like the rest of this module's own
  * tables — writes to it go through the injected `EntityManagerInterface` /
- * `TpProductCustomizationFieldRepository`, never a separate DBAL write, so
- * this table is never written through two persistence mechanisms in the
- * same request. See {@see self::setStoredFieldIds()} for the explicit-flush
- * requirement this implies.
+ * `TailoredProductCustomizationFieldRepository`, never a separate DBAL
+ * write, so this table is never written through two persistence mechanisms
+ * in the same request. See {@see self::setStoredFieldIds()} for the
+ * explicit-flush requirement this implies.
  *
  * Triggered from the existing `actionAfterUpdateProductFormHandler` hook via
  * `ProductConfigManager::saveFromFormData()` — no new hook.
@@ -62,7 +62,7 @@ final class CustomizationFieldRegistry
 
     /**
      * The single source of truth for the six (product, slug) rows this
-     * module provisions in `tp_product_customization_field`. Any code
+     * module provisions in `tailored_product_customization_field`. Any code
      * needing "all six slugs" (e.g. `getStoredFieldIds()`'s default map)
      * must read this constant rather than restring the list.
      */
@@ -93,7 +93,7 @@ final class CustomizationFieldRegistry
         private readonly Connection $connection,
         private readonly TranslatorInterface $translator,
         private readonly EntityManagerInterface $entityManager,
-        private readonly TpProductCustomizationFieldRepository $customizationFieldRepository,
+        private readonly TailoredProductCustomizationFieldRepository $customizationFieldRepository,
     ) {
     }
 
@@ -101,8 +101,9 @@ final class CustomizationFieldRegistry
      * Ensures the three unconditional `is_module=1` Width/Height/Cord-side
      * fields exist for $idProduct, plus one field per {@see self::OPTIONAL_FIELD_LABELS}
      * slug gated on `$optionalFields[$slug]` (missing key reads as false).
-     * Idempotent: reuses the ids already stored in `tp_product_customization_field`
-     * when the referenced rows still exist and are live; otherwise
+     * Idempotent: reuses the ids already stored in
+     * `tailored_product_customization_field` when the referenced rows still
+     * exist and are live; otherwise
      * (re)provisions a fresh field. A false gate soft-deletes any stored
      * field for that slot instead.
      *
@@ -139,8 +140,9 @@ final class CustomizationFieldRegistry
 
     /**
      * Soft-deletes (`is_deleted = 1`) the module's fields — never
-     * hard-delete (6-C) — clears the product's `tp_product_customization_field`
-     * rows, and recomputes `product.customizable` from whatever live
+     * hard-delete (6-C) — clears the product's
+     * `tailored_product_customization_field` rows, and recomputes
+     * `product.customizable` from whatever live
      * (non-deleted) customization fields remain for the product, rather than
      * blindly zeroing it: an independent, non-module customization field the
      * merchant added separately must survive untouched (6-F).
@@ -172,7 +174,8 @@ final class CustomizationFieldRegistry
     }
 
     /**
-     * Replaces the product's entire `tp_product_customization_field` row set:
+     * Replaces the product's entire `tailored_product_customization_field`
+     * row set:
      * bulk-deletes what's there, then persists one new row per non-null slug
      * in $ids. Delete-then-insert, not upsert — the whole set is recomputed
      * on every `register()`/`unregister()` call anyway, and this keeps
@@ -191,7 +194,7 @@ final class CustomizationFieldRegistry
     private function setStoredFieldIds(int $idProduct, array $ids): void
     {
         $this->customizationFieldRepository->deleteByProductId($idProduct);
-        $this->entityManager->clear(TpProductCustomizationField::class);
+        $this->entityManager->clear(TailoredProductCustomizationField::class);
 
         foreach (self::FIELD_SLUGS as $slug) {
             $idCustomizationField = $ids[$slug] ?? null;
@@ -200,7 +203,7 @@ final class CustomizationFieldRegistry
             }
 
             $this->entityManager->persist(
-                new TpProductCustomizationField($idProduct, $slug, $idCustomizationField)
+                new TailoredProductCustomizationField($idProduct, $slug, $idCustomizationField)
             );
         }
 

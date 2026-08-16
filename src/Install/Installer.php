@@ -88,7 +88,7 @@ final class Installer
 
         $softDeleted = $db->execute(
             'UPDATE `' . $prefix . 'customization_field` cf
-             INNER JOIN `' . $prefix . 'tp_product_customization_field` f ON f.`id_customization_field` = cf.`id_customization_field`
+             INNER JOIN `' . $prefix . 'tailored_product_customization_field` f ON f.`id_customization_field` = cf.`id_customization_field`
              SET cf.`is_deleted` = 1
              WHERE cf.`is_deleted` = 0'
         );
@@ -110,8 +110,8 @@ final class Installer
     /**
      * @param array<string, int> $resetData
      *
-     * Applies $resetData columns via a set-based UPDATE joined on tp_product_config,
-     * scoped to a single table (product or product_shop).
+     * Applies $resetData columns via a set-based UPDATE joined on
+     * tailored_product_settings, scoped to a single table (product or product_shop).
      */
     private function resetProductCustomizations(\Db $db, string $prefix, string $table, array $resetData): bool
     {
@@ -123,7 +123,7 @@ final class Installer
 
         return $db->execute(
             'UPDATE `' . $prefix . $table . '` `' . $table . '`
-             INNER JOIN `' . $prefix . 'tp_product_config` c ON c.`id_product` = `' . $table . '`.`id_product`
+             INNER JOIN `' . $prefix . 'tailored_product_settings` c ON c.`id_product` = `' . $table . '`.`id_product`
              SET ' . $set
         );
     }

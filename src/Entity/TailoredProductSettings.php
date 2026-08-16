@@ -7,13 +7,20 @@ namespace PrestaShop\Module\TailoredProducts\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Doctrine entity mirroring `tp_product_config` (one row per product with
- * Tailored Products Pricing enabled). Natural, application-assigned PK
+ * Doctrine entity mirroring `tailored_product_settings` (one row per product
+ * with Tailored Products Pricing enabled). Natural, application-assigned PK
  * (`id_product`) — no GeneratedValue.
  *
- * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository")
+ * Deliberately no `@ORM\Table(name=...)`: an explicit table name bypasses
+ * `DoctrineNamingStrategy`'s automatic `ps_` prefixing and causes a hard
+ * "table doesn't exist" fatal in production (see commit `5f811d7`, which
+ * fixed exactly this on the entities this one used to be named
+ * `TpProductConfig`/`TpCombinationConfig`). Let the naming strategy derive
+ * `tailored_product_settings` from the class name and apply the prefix.
+ *
+ * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository")
  */
-class TpProductConfig
+class TailoredProductSettings
 {
     /**
      * @var int
@@ -88,7 +95,7 @@ class TpProductConfig
      * choice carries no value of its own, so it gets an explicit flag column
      * rather than overloading the nullness of a settings column — and never
      * the nullness of the module's provisioned `customization_field` id for
-     * this slug (now recorded in `tp_product_customization_field`, see
+     * this slug (now recorded in `tailored_product_customization_field`, see
      * {@see \PrestaShop\Module\TailoredProducts\Service\CustomizationFieldRegistry}),
      * which is provisioning state, not merchant intent.
      *

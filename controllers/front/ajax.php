@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
-use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 use PrestaShopBundle\Utils\FloatParser;
 
 if (!defined('_PS_VERSION_')) {
@@ -37,8 +37,8 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         $height = $floatParser->fromString((string) Tools::getValue('height'));
         $cassette = (string) Tools::getValue('cassette');
 
-        $productConfig = $this->getProductConfigRepository()->findByProductId($idProduct);
-        $pricePerSqm = $this->getCombinationConfigRepository()->getPricePerSqm($idProductAttribute);
+        $productConfig = $this->getTailoredProductSettingsRepository()->findByProductId($idProduct);
+        $pricePerSqm = $this->getTailoredProductAttributeRepository()->getPricePerSqm($idProductAttribute);
 
         if ($productConfig === null || !isset(self::METERS_PER_UNIT[$productConfig->getUnit()])) {
             $this->ajaxRender(json_encode(['success' => false]));
@@ -68,18 +68,18 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         ]));
     }
 
-    private function getProductConfigRepository(): ProductConfigRepository
+    private function getTailoredProductSettingsRepository(): TailoredProductSettingsRepository
     {
-        /** @var ProductConfigRepository $repository */
-        $repository = $this->module->get(ProductConfigRepository::class);
+        /** @var TailoredProductSettingsRepository $repository */
+        $repository = $this->module->get(TailoredProductSettingsRepository::class);
 
         return $repository;
     }
 
-    private function getCombinationConfigRepository(): CombinationConfigRepository
+    private function getTailoredProductAttributeRepository(): TailoredProductAttributeRepository
     {
-        /** @var CombinationConfigRepository $repository */
-        $repository = $this->module->get(CombinationConfigRepository::class);
+        /** @var TailoredProductAttributeRepository $repository */
+        $repository = $this->module->get(TailoredProductAttributeRepository::class);
 
         return $repository;
     }

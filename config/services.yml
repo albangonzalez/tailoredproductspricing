@@ -35,20 +35,20 @@ services:
             # $entityManager and $customizationFieldRepository autowire by type.
 
     # Repositories
-    PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository:
-        class: PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository
+    PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProducts\Entity\TpProductConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TailoredProductSettings
 
-    PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository:
-        class: PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository
+    PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProducts\Entity\TpCombinationConfig
+            - PrestaShop\Module\TailoredProducts\Entity\TailoredProductAttribute
 
-    PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository:
-        class: PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository
+    PrestaShop\Module\TailoredProducts\Repository\TailoredProductCustomizationFieldRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\TailoredProductCustomizationFieldRepository
         factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
         arguments:
-            - PrestaShop\Module\TailoredProducts\Entity\TpProductCustomizationField
+            - PrestaShop\Module\TailoredProducts\Entity\TailoredProductCustomizationField

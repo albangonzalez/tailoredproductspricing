@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PrestaShop\Module\TailoredProducts\Service;
 
 use Doctrine\DBAL\Connection;
-use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 
 /**
  * Resolves whether Tailored Products Pricing is enabled for the product
@@ -20,7 +20,7 @@ final class CombinationEnablementChecker
 {
     public function __construct(
         private readonly Connection $connection,
-        private readonly ProductConfigRepository $productConfigRepository
+        private readonly TailoredProductSettingsRepository $productConfigRepository
     ) {
     }
 

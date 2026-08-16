@@ -7,10 +7,11 @@ namespace PrestaShop\Module\TailoredProducts\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Doctrine entity mirroring `tp_product_customization_field` (one row per
- * (product, slug) provisioned `customization_field` id). Composite natural,
- * application-assigned PK (`id_product`, `field_slug`) — no GeneratedValue,
- * matching the module's convention (see `TpProductConfig`, `TpCombinationConfig`).
+ * Doctrine entity mirroring `tailored_product_customization_field` (one row
+ * per (product, slug) provisioned `customization_field` id). Composite
+ * natural, application-assigned PK (`id_product`, `field_slug`) — no
+ * GeneratedValue, matching the module's convention (see
+ * `TailoredProductSettings`, `TailoredProductAttribute`).
  *
  * Absence of a row means "not provisioned" — there is no nullable id column
  * here, unlike the six positional columns this table replaces.
@@ -18,12 +19,12 @@ use Doctrine\ORM\Mapping as ORM;
  * Deliberately no `@ORM\Table(name=...)`: an explicit table name bypasses
  * `DoctrineNamingStrategy`'s automatic `ps_` prefixing and causes a hard
  * "table doesn't exist" fatal in production (see commit `5f811d7`). Let the
- * naming strategy derive `tp_product_customization_field` from the class
- * name and apply the prefix.
+ * naming strategy derive `tailored_product_customization_field` from the
+ * class name and apply the prefix.
  *
- * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\TpProductCustomizationFieldRepository")
+ * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\TailoredProductCustomizationFieldRepository")
  */
-class TpProductCustomizationField
+class TailoredProductCustomizationField
 {
     /**
      * @var int

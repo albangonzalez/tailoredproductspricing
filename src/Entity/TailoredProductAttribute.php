@@ -7,13 +7,20 @@ namespace PrestaShop\Module\TailoredProducts\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Doctrine entity mirroring `tp_combination_config` (one row per
- * combination with a price-per-m² override). Natural, application-assigned
- * PK (`id_product_attribute`) — no GeneratedValue.
+ * Doctrine entity mirroring `tailored_product_attribute` (one row
+ * per combination with a price-per-m² override). Natural,
+ * application-assigned PK (`id_product_attribute`) — no GeneratedValue.
  *
- * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository")
+ * Deliberately no `@ORM\Table(name=...)`: an explicit table name bypasses
+ * `DoctrineNamingStrategy`'s automatic `ps_` prefixing and causes a hard
+ * "table doesn't exist" fatal in production (see commit `5f811d7`, which
+ * fixed exactly this on this entity when it was named `TpCombinationConfig`).
+ * Let the naming strategy derive `tailored_product_attribute` from
+ * the class name and apply the prefix.
+ *
+ * @ORM\Entity(repositoryClass="PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository")
  */
-class TpCombinationConfig
+class TailoredProductAttribute
 {
     /**
      * @var int

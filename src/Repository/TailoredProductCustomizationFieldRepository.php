@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace PrestaShop\Module\TailoredProducts\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use PrestaShop\Module\TailoredProducts\Entity\TpProductCustomizationField;
+use PrestaShop\Module\TailoredProducts\Entity\TailoredProductCustomizationField;
 
 /**
- * Doctrine repository for `tp_product_customization_field`, built by the
- * `doctrine.orm.default_entity_manager`'s `getRepository` factory (see
+ * Doctrine repository for `tailored_product_customization_field`, built by
+ * the `doctrine.orm.default_entity_manager`'s `getRepository` factory (see
  * config/services.yml / config/front/services.yml). It cannot receive
  * custom constructor dependencies — business logic belongs to
  * {@see \PrestaShop\Module\TailoredProducts\Service\CustomizationFieldRegistry}
  * (the sole writer) and {@see \PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer}
  * (a read-only consumer).
  */
-class TpProductCustomizationFieldRepository extends EntityRepository
+class TailoredProductCustomizationFieldRepository extends EntityRepository
 {
     /**
-     * @return list<TpProductCustomizationField>
+     * @return list<TailoredProductCustomizationField>
      */
     public function findByProductId(int $idProduct): array
     {

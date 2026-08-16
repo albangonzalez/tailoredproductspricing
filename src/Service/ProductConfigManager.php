@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace PrestaShop\Module\TailoredProducts\Service;
 
 use PrestaShop\Module\TailoredProducts\Adapter\ColorAttributeProvider;
-use PrestaShop\Module\TailoredProducts\Entity\TpProductConfig;
-use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Entity\TailoredProductSettings;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 
 /**
- * Owns all `tp_product_config` business logic: unit allow-list validation,
- * numeric normalization, find-or-create/delete, and entity <-> array
- * mapping for the product Details-tab hook flow. Pulled out of the module
- * class so the hook methods stay thin delegations.
+ * Owns all `tailored_product_settings` business logic: unit allow-list
+ * validation, numeric normalization, find-or-create/delete, and entity <->
+ * array mapping for the product Details-tab hook flow. Pulled out of the
+ * module class so the hook methods stay thin delegations.
  */
 final class ProductConfigManager
 {
@@ -20,7 +20,7 @@ final class ProductConfigManager
     private const DEFAULT_UNIT = 'cm';
 
     public function __construct(
-        private readonly ProductConfigRepository $repository,
+        private readonly TailoredProductSettingsRepository $repository,
         private readonly CustomizationFieldRegistry $customizationFieldRegistry,
         private readonly ColorAttributeProvider $colorAttributeProvider,
         private readonly int $contextShopId
@@ -75,7 +75,7 @@ final class ProductConfigManager
             ? $tppSettings['tpp_unit']
             : self::DEFAULT_UNIT;
 
-        $config = $this->repository->findByProductId($idProduct) ?? new TpProductConfig($idProduct);
+        $config = $this->repository->findByProductId($idProduct) ?? new TailoredProductSettings($idProduct);
 
         $config
             ->setMinWidth($this->nullableDecimal($tppSettings['tpp_min_width'] ?? null))
@@ -87,8 +87,8 @@ final class ProductConfigManager
             ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings))
             ->setRollDirectionEnabled((bool) ($tppSettings['tpp_roll_direction_enabled'] ?? false));
 
-        // Persist the base settings first so the `tp_product_config` row
-        // exists for the registry to record the resolved field ids onto.
+        // Persist the base settings first so the `tailored_product_settings`
+        // row exists for the registry to record the resolved field ids onto.
         $this->repository->save($config);
 
         $this->customizationFieldRegistry->register($idProduct, [

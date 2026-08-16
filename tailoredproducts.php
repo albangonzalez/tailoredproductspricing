@@ -3,8 +3,8 @@
 use PrestaShop\Module\TailoredProducts\Form\Modifier\CombinationFormModifier;
 use PrestaShop\Module\TailoredProducts\Form\Modifier\ProductFormModifier;
 use PrestaShop\Module\TailoredProducts\Install\Installer;
-use PrestaShop\Module\TailoredProducts\Repository\CombinationConfigRepository;
-use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 use PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer;
 use PrestaShop\Module\TailoredProducts\Service\DimensionsFieldsProvider;
 use PrestaShop\Module\TailoredProducts\Service\ProductChoicesProvider;
@@ -104,13 +104,13 @@ class TailoredProducts extends Module
 
     public function hookActionCombinationFormFormDataProviderData(array $params): void
     {
-        $params['data']['tpp_price_per_sqm'] = $this->get(CombinationConfigRepository::class)
+        $params['data']['tpp_price_per_sqm'] = $this->get(TailoredProductAttributeRepository::class)
             ->getPricePerSqm((int) ($params['id'] ?? 0));
     }
 
     public function hookActionAfterUpdateCombinationFormFormHandler(array $params): void
     {
-        $this->get(CombinationConfigRepository::class)->save(
+        $this->get(TailoredProductAttributeRepository::class)->save(
             (int) ($params['id'] ?? 0),
             (float) ($params['form_data']['tpp_price_per_sqm'] ?? 0)
         );
@@ -161,7 +161,7 @@ class TailoredProducts extends Module
         }
 
         $idProduct = (int) Tools::getValue('id_product');
-        if ($idProduct <= 0 || $this->get(ProductConfigRepository::class)->findByProductId($idProduct) === null) {
+        if ($idProduct <= 0 || $this->get(TailoredProductSettingsRepository::class)->findByProductId($idProduct) === null) {
             return;
         }
 

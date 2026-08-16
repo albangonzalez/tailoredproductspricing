@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\TailoredProducts\Service;
 
-use PrestaShop\Module\TailoredProducts\Repository\ProductConfigRepository;
+use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 
 /**
  * Pure data/gating service for the front-office dimensions form
@@ -17,7 +17,7 @@ final class DimensionsFieldsProvider
     private const STEP_BY_UNIT = ['cm' => '0.1', 'mm' => '1'];
 
     public function __construct(
-        private readonly ProductConfigRepository $productConfigRepository,
+        private readonly TailoredProductSettingsRepository $productConfigRepository,
     ) {
     }
 

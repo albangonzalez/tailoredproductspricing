@@ -12,7 +12,7 @@ final class SqlQueries
     public static function installQueries(): array
     {
         return [
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tp_product_config` (
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tailored_product_settings` (
               `id_product` int(10) unsigned NOT NULL,
               `min_width` decimal(10,2) unsigned DEFAULT NULL,
               `max_width` decimal(10,2) unsigned DEFAULT NULL,
@@ -25,13 +25,13 @@ final class SqlQueries
               PRIMARY KEY (`id_product`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tp_combination_config` (
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tailored_product_attribute` (
               `id_product_attribute` int(10) unsigned NOT NULL,
               `price_per_sqm` decimal(20,2) NOT NULL DEFAULT \'0.00\',
               PRIMARY KEY (`id_product_attribute`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tp_product_customization_field` (
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tailored_product_customization_field` (
               `id_product` int(10) unsigned NOT NULL,
               `field_slug` varchar(32) NOT NULL,
               `id_customization_field` int(10) unsigned NOT NULL,
@@ -47,9 +47,9 @@ final class SqlQueries
     public static function uninstallQueries(): array
     {
         return [
-            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tp_combination_config`',
-            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tp_product_customization_field`',
-            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tp_product_config`',
+            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_attribute`',
+            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_customization_field`',
+            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_settings`',
         ];
     }
 }
