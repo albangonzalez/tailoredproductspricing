@@ -98,6 +98,11 @@ class TailoredProductSettings
      */
     private $rollDirectionEnabled = false;
 
+    /**
+     * @ORM\Column(type="boolean", options={"unsigned"=true, "default"=0})
+     */
+    private $isMatrix = false;
+
     public function __construct(int $idProduct)
     {
         $this->idProduct = $idProduct;
@@ -188,6 +193,18 @@ class TailoredProductSettings
     public function setRollDirectionEnabled(bool $rollDirectionEnabled): self
     {
         $this->rollDirectionEnabled = $rollDirectionEnabled;
+
+        return $this;
+    }
+
+    public function isMatrix(): bool
+    {
+        return $this->isMatrix;
+    }
+
+    public function setIsMatrix(bool $isMatrix): self
+    {
+        $this->isMatrix = $isMatrix;
 
         return $this;
     }

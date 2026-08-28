@@ -35,6 +35,12 @@ services:
         arguments:
             - PrestaShop\Module\TailoredProducts\Entity\TailoredProductCustomizationField
 
+    PrestaShop\Module\TailoredProducts\Repository\TailoredProductMatrixRepository:
+        class: PrestaShop\Module\TailoredProducts\Repository\TailoredProductMatrixRepository
+        factory: ['@doctrine.orm.default_entity_manager', 'getRepository']
+        arguments:
+            - PrestaShop\Module\TailoredProducts\Entity\TailoredProductMatrix
+
     PrestaShop\Module\TailoredProducts\Service\PriceWriter:
         arguments:
             $connection: '@doctrine.dbal.default_connection'

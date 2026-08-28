@@ -21,6 +21,7 @@ final class SqlQueries
               `cassette_price_per_meter` decimal(20,2) DEFAULT NULL,
               `id_attribute_group_mechanism_color` int(10) unsigned DEFAULT NULL,
               `roll_direction_enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,
+              `is_matrix` tinyint(1) unsigned NOT NULL DEFAULT 0,
               PRIMARY KEY (`id_product`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 
@@ -37,6 +38,14 @@ final class SqlQueries
               PRIMARY KEY (`id_product`, `field_slug`),
               KEY `id_customization_field` (`id_customization_field`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
+
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tailored_product_matrix` (
+              `id_product` int(10) unsigned NOT NULL,
+              `width_ceiling` int(10) unsigned NOT NULL,
+              `height_ceiling` int(10) unsigned NOT NULL,
+              `price` decimal(20,6) NOT NULL,
+              PRIMARY KEY (`id_product`, `width_ceiling`, `height_ceiling`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
         ];
     }
 
@@ -46,6 +55,7 @@ final class SqlQueries
     public static function uninstallQueries(): array
     {
         return [
+            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_matrix`',
             'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_attribute`',
             'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_customization_field`',
             'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'tailored_product_settings`',
