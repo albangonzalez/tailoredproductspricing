@@ -35,7 +35,7 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         $cassette = (string) Tools::getValue('cassette');
 
         $productConfig = $this->getTailoredProductSettingsRepository()->findByProductId($idProduct);
-        $pricePerSqm = $this->getTailoredProductAttributeRepository()->getPricePerSqm($idProductAttribute);
+        $unitPrice = $this->getTailoredProductAttributeRepository()->getUnitPrice($idProductAttribute);
 
         if ($productConfig === null) {
             $this->ajaxRender(json_encode(['success' => false]));
@@ -52,7 +52,7 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
             $cassetteSurcharge = (float) $cassettePricePerMeter * $widthInMeters;
         }
 
-        $price = $pricePerSqm * $widthInMeters * $heightInMeters + $cassetteSurcharge;
+        $price = $unitPrice * $widthInMeters * $heightInMeters + $cassetteSurcharge;
 
         $currency = $this->context->currency;
         $priceFormatted = $this->context->getCurrentLocale()->formatPrice($price, $currency->iso_code);

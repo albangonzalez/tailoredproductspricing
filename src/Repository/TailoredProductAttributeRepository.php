@@ -20,14 +20,14 @@ class TailoredProductAttributeRepository extends EntityRepository
         return $this->find($idProductAttribute);
     }
 
-    public function getPricePerSqm(int $idProductAttribute): float
+    public function getUnitPrice(int $idProductAttribute): float
     {
         $config = $this->findByPk($idProductAttribute);
 
-        return $config ? (float) $config->getPricePerSqm() : 0.0;
+        return $config ? (float) $config->getUnitPrice() : 0.0;
     }
 
-    public function save(int $idProductAttribute, float $pricePerSqm): void
+    public function save(int $idProductAttribute, float $unitPrice): void
     {
         if ($idProductAttribute <= 0) {
             return;
@@ -40,7 +40,7 @@ class TailoredProductAttributeRepository extends EntityRepository
             $config = new TailoredProductAttribute($idProductAttribute);
         }
 
-        $config->setPricePerSqm((string) $pricePerSqm);
+        $config->setUnitPrice((string) $unitPrice);
 
         $entityManager->persist($config);
         $entityManager->flush();

@@ -104,15 +104,15 @@ class TailoredProducts extends Module
 
     public function hookActionCombinationFormFormDataProviderData(array $params): void
     {
-        $params['data']['tpp_price_per_sqm'] = $this->get(TailoredProductAttributeRepository::class)
-            ->getPricePerSqm((int) ($params['id'] ?? 0));
+        $params['data']['tpp_unit_price'] = $this->get(TailoredProductAttributeRepository::class)
+            ->getUnitPrice((int) ($params['id'] ?? 0));
     }
 
     public function hookActionAfterUpdateCombinationFormFormHandler(array $params): void
     {
         $this->get(TailoredProductAttributeRepository::class)->save(
             (int) ($params['id'] ?? 0),
-            (float) ($params['form_data']['tpp_price_per_sqm'] ?? 0)
+            (float) ($params['form_data']['tpp_unit_price'] ?? 0)
         );
     }
 

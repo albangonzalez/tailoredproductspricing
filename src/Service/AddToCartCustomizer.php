@@ -184,10 +184,10 @@ class AddToCartCustomizer
         int $idProductAttribute,
         array $submitted
     ): void {
-        $pricePerSqm = $this->combinationConfigRepository->getPricePerSqm($idProductAttribute);
+        $unitPrice = $this->combinationConfigRepository->getUnitPrice($idProductAttribute);
         $breakdown = $this->priceCalculator->calculate(
             $config,
-            $pricePerSqm,
+            $unitPrice,
             $submitted['width'],
             $submitted['height'],
             // hasCassette only means "a valid with/without value was submitted" (it also
@@ -198,7 +198,7 @@ class AddToCartCustomizer
 
         // Width and height are two rows of the same id_customization, and
         // getCustomizationPrice() SUMs every row of it — the roller price
-        // (price_per_sqm x width_m x height_m) must be written on exactly
+        // (unit_price x width_m x height_m) must be written on exactly
         // ONE of them, never both, or the customer is charged twice. Width
         // carries it, height stays 0; do not "balance" this.
         $writtenIndexes = [];

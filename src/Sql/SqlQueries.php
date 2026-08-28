@@ -26,7 +26,7 @@ final class SqlQueries
 
             'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'tailored_product_attribute` (
               `id_product_attribute` int(10) unsigned NOT NULL,
-              `price_per_sqm` decimal(20,2) NOT NULL DEFAULT \'0.00\',
+              `unit_price` decimal(20,2) NOT NULL DEFAULT \'0.00\',
               PRIMARY KEY (`id_product_attribute`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',
 

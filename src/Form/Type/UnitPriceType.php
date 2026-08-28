@@ -9,12 +9,12 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * The per-combination "price per m²" field, rendered in the Combination
+ * The per-combination unit price field, rendered in the Combination
  * modal. Kept as a root scalar (getParent() = NumberType) so the mapped
- * data key stays `tpp_price_per_sqm` at the form root, unchanged from the
+ * data key stays `tpp_unit_price` at the form root, unchanged from the
  * previous inline field definition.
  */
-final class PricePerSqmType extends AbstractType
+final class UnitPriceType extends AbstractType
 {
     public function getParent(): string
     {

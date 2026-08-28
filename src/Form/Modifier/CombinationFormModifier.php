@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\TailoredProducts\Form\Modifier;
 
-use PrestaShop\Module\TailoredProducts\Form\Type\PricePerSqmType;
+use PrestaShop\Module\TailoredProducts\Form\Type\UnitPriceType;
 use PrestaShop\Module\TailoredProducts\Service\CombinationEnablementChecker;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
- * Injects the `tpp_price_per_sqm` field into the admin Combination modal
+ * Injects the `tpp_unit_price` field into the admin Combination modal
  * form, when the parent product has Tailored Products Pricing enabled.
  *
  * Unlike {@see ProductFormModifier}, this does not use the core
@@ -31,8 +31,8 @@ final class CombinationFormModifier
             return;
         }
 
-        $combinationFormBuilder->add('tpp_price_per_sqm', PricePerSqmType::class, [
-            'data' => $data['tpp_price_per_sqm'] ?? 0,
+        $combinationFormBuilder->add('tpp_unit_price', UnitPriceType::class, [
+            'data' => $data['tpp_unit_price'] ?? 0,
         ]);
     }
 }

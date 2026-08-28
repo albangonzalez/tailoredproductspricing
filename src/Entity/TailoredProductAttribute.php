@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Doctrine entity mirroring `tailored_product_attribute` (one row
- * per combination with a price-per-m² override). Natural,
+ * per combination with a unit-price override). Natural,
  * application-assigned PK (`id_product_attribute`) — no GeneratedValue.
  *
  * Deliberately no `@ORM\Table(name=...)`: an explicit table name bypasses
@@ -33,9 +33,9 @@ class TailoredProductAttribute
     /**
      * @var string
      *
-     * @ORM\Column(name="price_per_sqm", type="decimal", precision=20, scale=2, options={"default"="0.00"})
+     * @ORM\Column(name="unit_price", type="decimal", precision=20, scale=2, options={"default"="0.00"})
      */
-    private $pricePerSqm = '0.00';
+    private $unitPrice = '0.00';
 
     public function __construct(int $idProductAttribute)
     {
@@ -47,14 +47,14 @@ class TailoredProductAttribute
         return $this->idProductAttribute;
     }
 
-    public function getPricePerSqm(): string
+    public function getUnitPrice(): string
     {
-        return $this->pricePerSqm;
+        return $this->unitPrice;
     }
 
-    public function setPricePerSqm(string $pricePerSqm): self
+    public function setUnitPrice(string $unitPrice): self
     {
-        $this->pricePerSqm = $pricePerSqm;
+        $this->unitPrice = $unitPrice;
 
         return $this;
     }

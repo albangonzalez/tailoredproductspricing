@@ -22,7 +22,7 @@ class PriceCalculator
      */
     public function calculate(
         TailoredProductSettings $config,
-        float $pricePerSqm,
+        float $unitPrice,
         string $rawWidth,
         string $rawHeight,
         bool $withCassette
@@ -31,7 +31,7 @@ class PriceCalculator
         $widthInMeters = $floatParser->fromString($rawWidth) / self::CM_PER_METER;
         $heightInMeters = $floatParser->fromString($rawHeight) / self::CM_PER_METER;
 
-        $rollerPrice = $pricePerSqm * $widthInMeters * $heightInMeters;
+        $rollerPrice = $unitPrice * $widthInMeters * $heightInMeters;
 
         $cassettePricePerMeter = $config->getCassettePricePerMeter();
         $cassettePrice = 0.0;
