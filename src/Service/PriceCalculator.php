@@ -15,10 +15,7 @@ use PrestaShopBundle\Utils\FloatParser;
  */
 class PriceCalculator
 {
-    private const METERS_PER_UNIT = [
-        'cm' => 100.0,
-        'mm' => 1000.0,
-    ];
+    private const CM_PER_METER = 100.0;
 
     /**
      * @return array{rollerPrice: float, cassettePrice: float}
@@ -30,13 +27,9 @@ class PriceCalculator
         string $rawHeight,
         bool $withCassette
     ): array {
-        if (!isset(self::METERS_PER_UNIT[$config->getUnit()])) {
-            return ['rollerPrice' => 0.0, 'cassettePrice' => 0.0];
-        }
-        $metersPerUnit = self::METERS_PER_UNIT[$config->getUnit()];
         $floatParser = new FloatParser();
-        $widthInMeters = $floatParser->fromString($rawWidth) / $metersPerUnit;
-        $heightInMeters = $floatParser->fromString($rawHeight) / $metersPerUnit;
+        $widthInMeters = $floatParser->fromString($rawWidth) / self::CM_PER_METER;
+        $heightInMeters = $floatParser->fromString($rawHeight) / self::CM_PER_METER;
 
         $rollerPrice = $pricePerSqm * $widthInMeters * $heightInMeters;
 

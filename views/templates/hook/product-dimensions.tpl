@@ -11,7 +11,7 @@
         </div>
         <div class="form-group tpp-dimension-field">
             <label for="tpp_width">
-                {l s='Width' d='Modules.Tailoredproducts.Shop'} ({$unit|escape:'html'})
+                {l s='Width' d='Modules.Tailoredproducts.Shop'} (cm)
             </label>
             <input
                 type="number"
@@ -25,7 +25,7 @@
         </div>
         <div class="form-group tpp-dimension-field">
             <label for="tpp_height">
-                {l s='Height' d='Modules.Tailoredproducts.Shop'} ({$unit|escape:'html'})
+                {l s='Height' d='Modules.Tailoredproducts.Shop'} (cm)
             </label>
             <input
                 type="number"

@@ -18,7 +18,6 @@ final class SqlQueries
               `max_width` decimal(10,2) unsigned DEFAULT NULL,
               `min_height` decimal(10,2) unsigned DEFAULT NULL,
               `max_height` decimal(10,2) unsigned DEFAULT NULL,
-              `unit` varchar(8) NOT NULL DEFAULT \'cm\',
               `cassette_price_per_meter` decimal(20,2) DEFAULT NULL,
               `id_attribute_group_mechanism_color` int(10) unsigned DEFAULT NULL,
               `roll_direction_enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,

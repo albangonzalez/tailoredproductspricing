@@ -9,16 +9,13 @@ use PrestaShop\Module\TailoredProducts\Entity\TailoredProductSettings;
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 
 /**
- * Owns all `tailored_product_settings` business logic: unit allow-list
- * validation, numeric normalization, find-or-create/delete, and entity <->
- * array mapping for the product Details-tab hook flow. Pulled out of the
- * module class so the hook methods stay thin delegations.
+ * Owns all `tailored_product_settings` business logic: numeric
+ * normalization, find-or-create/delete, and entity <-> array mapping for
+ * the product Details-tab hook flow. Pulled out of the module class so the
+ * hook methods stay thin delegations.
  */
 final class ProductConfigManager
 {
-    private const ALLOWED_UNITS = ['cm', 'mm'];
-    private const DEFAULT_UNIT = 'cm';
-
     public function __construct(
         private readonly TailoredProductSettingsRepository $repository,
         private readonly CustomizationFieldRegistry $customizationFieldRegistry,
@@ -37,7 +34,6 @@ final class ProductConfigManager
 
         return [
             'tpp_enabled' => $config ? 1 : 0,
-            'tpp_unit' => $config ? $config->getUnit() : self::DEFAULT_UNIT,
             'tpp_min_width' => $config ? $config->getMinWidth() : null,
             'tpp_max_width' => $config ? $config->getMaxWidth() : null,
             'tpp_min_height' => $config ? $config->getMinHeight() : null,
@@ -71,10 +67,6 @@ final class ProductConfigManager
             return;
         }
 
-        $unit = in_array($tppSettings['tpp_unit'] ?? self::DEFAULT_UNIT, self::ALLOWED_UNITS, true)
-            ? $tppSettings['tpp_unit']
-            : self::DEFAULT_UNIT;
-
         $config = $this->repository->findByProductId($idProduct) ?? new TailoredProductSettings($idProduct);
 
         $config
@@ -82,7 +74,6 @@ final class ProductConfigManager
             ->setMaxWidth($this->nullableDecimal($tppSettings['tpp_max_width'] ?? null))
             ->setMinHeight($this->nullableDecimal($tppSettings['tpp_min_height'] ?? null))
             ->setMaxHeight($this->nullableDecimal($tppSettings['tpp_max_height'] ?? null))
-            ->setUnit($unit)
             ->setCassettePricePerMeter($this->cassettePrice($tppSettings))
             ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings))
             ->setRollDirectionEnabled((bool) ($tppSettings['tpp_roll_direction_enabled'] ?? false));
@@ -119,7 +110,6 @@ final class ProductConfigManager
             'max_width' => $config->getMaxWidth(),
             'min_height' => $config->getMinHeight(),
             'max_height' => $config->getMaxHeight(),
-            'unit' => $config->getUnit(),
             'cassette_price_per_meter' => $config->getCassettePricePerMeter(),
             'id_attribute_group_mechanism_color' => $config->getIdAttributeGroupMechanismColor(),
             'roll_direction_enabled' => $config->isRollDirectionEnabled(),

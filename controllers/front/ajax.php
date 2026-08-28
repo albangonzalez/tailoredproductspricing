@@ -12,10 +12,7 @@ if (!defined('_PS_VERSION_')) {
 
 class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
 {
-    private const METERS_PER_UNIT = [
-        'cm' => 100.0,
-        'mm' => 1000.0,
-    ];
+    private const CM_PER_METER = 100.0;
 
     // Mirrors AddToCartCustomizer::CASSETTE_VALUES; duplicated deliberately,
     // see cassette-pricing spec §3.1.
@@ -40,15 +37,14 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         $productConfig = $this->getTailoredProductSettingsRepository()->findByProductId($idProduct);
         $pricePerSqm = $this->getTailoredProductAttributeRepository()->getPricePerSqm($idProductAttribute);
 
-        if ($productConfig === null || !isset(self::METERS_PER_UNIT[$productConfig->getUnit()])) {
+        if ($productConfig === null) {
             $this->ajaxRender(json_encode(['success' => false]));
 
             return;
         }
 
-        $metersPerUnit = self::METERS_PER_UNIT[$productConfig->getUnit()];
-        $widthInMeters = $width / $metersPerUnit;
-        $heightInMeters = $height / $metersPerUnit;
+        $widthInMeters = $width / self::CM_PER_METER;
+        $heightInMeters = $height / self::CM_PER_METER;
 
         $cassettePricePerMeter = $productConfig->getCassettePricePerMeter();
         $cassetteSurcharge = 0.0;

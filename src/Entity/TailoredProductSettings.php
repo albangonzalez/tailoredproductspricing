@@ -59,13 +59,6 @@ class TailoredProductSettings
     private $maxHeight;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="unit", type="string", length=8, options={"default"="cm"})
-     */
-    private $unit = 'cm';
-
-    /**
      * Cassette (cenefa) price, expressed per linear meter of the customer-entered
      * width: surcharge = value × width_m. Null means the cassette choice is not
      * offered for this product — there is no separate enabled flag.
@@ -159,18 +152,6 @@ class TailoredProductSettings
     public function setMaxHeight(?string $maxHeight): self
     {
         $this->maxHeight = $maxHeight;
-
-        return $this;
-    }
-
-    public function getUnit(): string
-    {
-        return $this->unit;
-    }
-
-    public function setUnit(string $unit): self
-    {
-        $this->unit = $unit;
 
         return $this;
     }

@@ -38,14 +38,6 @@ class TailoredProductsSettingsType extends AbstractType
                 'target_selector' => self::FIELD_SELECTOR,
                 'disable_on_match' => true,
                 'form_theme' => self::FORM_THEME,
-            ])
-            ->add('tpp_unit', ChoiceType::class, [
-                'label' => 'Dimension unit',
-                'required' => false,
-                'choices' => ['cm' => 'cm', 'mm' => 'mm'],
-                'placeholder' => false,
-                'row_attr' => ['class' => self::FIELD_CLASS],
-                'form_theme' => self::FORM_THEME,
             ]);
 
         foreach ([

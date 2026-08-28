@@ -14,7 +14,7 @@ use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsReposit
  */
 final class DimensionsFieldsProvider
 {
-    private const STEP_BY_UNIT = ['cm' => '0.1', 'mm' => '1'];
+    private const STEP = '0.1';
 
     public function __construct(
         private readonly TailoredProductSettingsRepository $productConfigRepository,
@@ -25,7 +25,7 @@ final class DimensionsFieldsProvider
      * Returns the Smarty view-model for the FO dimensions form, or null when the
      * module is not enabled for this product (same signal as the combination flow).
      *
-     * @return array{unit:string, step:string, minWidth:?string, maxWidth:?string, minHeight:?string, maxHeight:?string}|null
+     * @return array{step:string, minWidth:?string, maxWidth:?string, minHeight:?string, maxHeight:?string}|null
      */
     public function getViewData(int $idProduct): ?array
     {
@@ -34,11 +34,8 @@ final class DimensionsFieldsProvider
             return null;
         }
 
-        $unit = $config->getUnit();
-
         return [
-            'unit' => $unit,
-            'step' => self::STEP_BY_UNIT[$unit] ?? '0.1',
+            'step' => self::STEP,
             'minWidth' => $config->getMinWidth(),
             'maxWidth' => $config->getMaxWidth(),
             'minHeight' => $config->getMinHeight(),
