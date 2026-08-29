@@ -20,15 +20,19 @@ class TailoredProductMatrixRepository extends EntityRepository
 
     public function resolveCeilings(int $idProduct, int $width, int $height): array
     {
+        // DQL's general CASE expression requires an ELSE clause, but a bare
+        // NULL literal isn't a valid DQL scalar expression — bind it as a
+        // parameter instead, which is accepted regardless of its value.
         $result = $this->createQueryBuilder('m')
             ->select(
-                'MIN(CASE WHEN m.widthCeiling >= :width THEN m.widthCeiling ELSE NULL END) AS width_ceiling',
-                'MIN(CASE WHEN m.heightCeiling >= :height THEN m.heightCeiling ELSE NULL END) AS height_ceiling'
+                'MIN(CASE WHEN m.widthCeiling >= :width THEN m.widthCeiling ELSE :null END) AS width_ceiling',
+                'MIN(CASE WHEN m.heightCeiling >= :height THEN m.heightCeiling ELSE :null END) AS height_ceiling'
             )
             ->where('m.idProduct = :idProduct')
             ->setParameter('idProduct', $idProduct)
             ->setParameter('width', $width)
             ->setParameter('height', $height)
+            ->setParameter('null', null)
             ->getQuery()
             ->getOneOrNullResult();
 

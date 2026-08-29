@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository;
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
-use PrestaShopBundle\Utils\FloatParser;
+use PrestaShop\Module\TailoredProducts\Service\PriceCalculator;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -12,16 +12,16 @@ if (!defined('_PS_VERSION_')) {
 
 class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
 {
-    private const CM_PER_METER = 100.0;
-
     // Mirrors AddToCartCustomizer::CASSETTE_VALUES; duplicated deliberately,
     // see cassette-pricing spec §3.1.
     private const CASSETTE_VALUES = ['without', 'with'];
     private const CASSETTE_SELECTED = 'with';
 
     /**
-     * Computes the tailored unit price for the given
-     * dimensions.
+     * Computes the tailored price for the given dimensions, delegating the
+     * arithmetic to PriceCalculator (formula or bracket-matrix, depending on
+     * the product's `is_matrix` setting — see
+     * .claude/docs/specs/bracket-matrix-pricing.md §3.5).
      */
     public function displayAjaxQuote(): void
     {
@@ -29,13 +29,11 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
 
         $idProduct = (int) Tools::getValue('id_product');
         $idProductAttribute = (int) Tools::getValue('id_product_attribute');
-        $floatParser = new FloatParser();
-        $width = $floatParser->fromString((string) Tools::getValue('width'));
-        $height = $floatParser->fromString((string) Tools::getValue('height'));
+        $rawWidth = (string) Tools::getValue('width');
+        $rawHeight = (string) Tools::getValue('height');
         $cassette = (string) Tools::getValue('cassette');
 
         $productConfig = $this->getTailoredProductSettingsRepository()->findByProductId($idProduct);
-        $unitPrice = $this->getTailoredProductAttributeRepository()->getUnitPrice($idProductAttribute);
 
         if ($productConfig === null) {
             $this->ajaxRender(json_encode(['success' => false]));
@@ -43,16 +41,32 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
             return;
         }
 
-        $widthInMeters = $width / self::CM_PER_METER;
-        $heightInMeters = $height / self::CM_PER_METER;
+        $attributeConfig = $this->getTailoredProductAttributeRepository()->findByPk($idProductAttribute);
 
-        $cassettePricePerMeter = $productConfig->getCassettePricePerMeter();
-        $cassetteSurcharge = 0.0;
-        if ($cassettePricePerMeter !== null && $cassette === self::CASSETTE_SELECTED) {
-            $cassetteSurcharge = (float) $cassettePricePerMeter * $widthInMeters;
+        $breakdown = $this->getPriceCalculator()->calculate(
+            $productConfig,
+            $attributeConfig,
+            $rawWidth,
+            $rawHeight,
+            $cassette === self::CASSETTE_SELECTED
+        );
+
+        if ($breakdown['status'] !== 'ok') {
+            $messages = [
+                'out_of_range' => 'This size exceeds what we can produce',
+                'unavailable' => 'This size is not available',
+            ];
+
+            $this->ajaxRender(json_encode([
+                'success' => false,
+                'reason' => $breakdown['status'],
+                'message' => $messages[$breakdown['status']] ?? '',
+            ]));
+
+            return;
         }
 
-        $price = $unitPrice * $widthInMeters * $heightInMeters + $cassetteSurcharge;
+        $price = $breakdown['rollerPrice'] + $breakdown['cassettePrice'];
 
         $currency = $this->context->currency;
         $priceFormatted = $this->context->getCurrentLocale()->formatPrice($price, $currency->iso_code);
@@ -78,5 +92,13 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         $repository = $this->module->get(TailoredProductAttributeRepository::class);
 
         return $repository;
+    }
+
+    private function getPriceCalculator(): PriceCalculator
+    {
+        /** @var PriceCalculator $priceCalculator */
+        $priceCalculator = $this->module->get(PriceCalculator::class);
+
+        return $priceCalculator;
     }
 }

@@ -184,10 +184,10 @@ class AddToCartCustomizer
         int $idProductAttribute,
         array $submitted
     ): void {
-        $unitPrice = $this->combinationConfigRepository->getUnitPrice($idProductAttribute);
+        $attributeConfig = $this->combinationConfigRepository->findByPk($idProductAttribute);
         $breakdown = $this->priceCalculator->calculate(
             $config,
-            $unitPrice,
+            $attributeConfig,
             $submitted['width'],
             $submitted['height'],
             // hasCassette only means "a valid with/without value was submitted" (it also

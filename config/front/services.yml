@@ -45,4 +45,8 @@ services:
         arguments:
             $connection: '@doctrine.dbal.default_connection'
 
+    PrestaShop\Module\TailoredProducts\Service\DimensionsPriceResolver: ~
+        # autowires TailoredProductMatrixRepository by type
+
     PrestaShop\Module\TailoredProducts\Service\PriceCalculator: ~
+        # autowires DimensionsPriceResolver by type
