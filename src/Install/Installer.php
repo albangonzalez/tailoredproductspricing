@@ -22,6 +22,7 @@ final class Installer
         'displayProductCustomizationBottom',
         'actionFrontControllerSetMedia',
         'actionCartControllerInitAfter',
+        'actionProductPriceCalculation',
     ];
 
     public function install(\Module $module): bool

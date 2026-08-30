@@ -14,6 +14,11 @@ services:
     PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer: ~
         # autowires TailoredProductSettingsRepository / TailoredProductCustomizationFieldRepository by type
 
+    PrestaShop\Module\TailoredProducts\Service\SpecificPriceReducer: ~
+
+    PrestaShop\Module\TailoredProducts\Service\CartCustomizationPriceAdjuster: ~
+        # autowires TailoredProductSettingsRepository / SpecificPriceReducer by type
+
     PrestaShop\Module\TailoredProducts\Service\ProductChoicesProvider: ~
         # autowires TailoredProductSettingsRepository by type
 

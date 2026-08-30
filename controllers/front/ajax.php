@@ -5,6 +5,7 @@ declare(strict_types=1);
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository;
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 use PrestaShop\Module\TailoredProducts\Service\PriceCalculator;
+use PrestaShop\Module\TailoredProducts\Service\SpecificPriceReducer;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -70,13 +71,19 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
 
         $taxRate = (new Product($idProduct))->getTaxesRate();
         $priceWithTax = $this->getPriceCalculator()->applyTaxRate($price, $taxRate);
-        
+
         $currency = $this->context->currency;
-        $priceFormatted = $this->context->getCurrentLocale()->formatPrice($priceWithTax, $currency->iso_code);
+
+        $specificPriceReducer = $this->getSpecificPriceReducer();
+        $specificPrice = $specificPriceReducer->resolveForCurrentContext($idProduct, $idProductAttribute ?: null);
+        $reduction = $specificPriceReducer->computeReduction($priceWithTax, $specificPrice, (int) $currency->id, true, $taxRate);
+        $finalPrice = max(0.0, $priceWithTax - $reduction);
+
+        $priceFormatted = $this->context->getCurrentLocale()->formatPrice($finalPrice, $currency->iso_code);
 
         $this->ajaxRender(json_encode([
             'success' => true,
-            'price' => $priceWithTax,
+            'price' => $finalPrice,
             'priceFormatted' => $priceFormatted,
         ]));
     }
@@ -103,5 +110,13 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         $priceCalculator = $this->module->get(PriceCalculator::class);
 
         return $priceCalculator;
+    }
+
+    private function getSpecificPriceReducer(): SpecificPriceReducer
+    {
+        /** @var SpecificPriceReducer $specificPriceReducer */
+        $specificPriceReducer = $this->module->get(SpecificPriceReducer::class);
+
+        return $specificPriceReducer;
     }
 }

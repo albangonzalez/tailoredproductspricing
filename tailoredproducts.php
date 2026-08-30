@@ -6,6 +6,7 @@ use PrestaShop\Module\TailoredProducts\Install\Installer;
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductAttributeRepository;
 use PrestaShop\Module\TailoredProducts\Repository\TailoredProductSettingsRepository;
 use PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer;
+use PrestaShop\Module\TailoredProducts\Service\CartCustomizationPriceAdjuster;
 use PrestaShop\Module\TailoredProducts\Service\DimensionsFieldsProvider;
 use PrestaShop\Module\TailoredProducts\Service\ProductChoicesProvider;
 use PrestaShop\Module\TailoredProducts\Service\ProductConfigManager;
@@ -185,6 +186,15 @@ class TailoredProducts extends Module
     public function hookActionCartControllerInitAfter(array $params): void
     {
         $this->get(AddToCartCustomizer::class)->handle($params['cart']);
+    }
+
+    // -------------------------------------------------------------------------
+    // Cart/order price calculation — drop the SEO-only base price
+    // -------------------------------------------------------------------------
+
+    public function hookActionProductPriceCalculation(array $params): void
+    {
+        $this->get(CartCustomizationPriceAdjuster::class)->adjust($params);
     }
 
     // -------------------------------------------------------------------------
