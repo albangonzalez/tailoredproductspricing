@@ -68,12 +68,15 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
 
         $price = $breakdown['rollerPrice'] + $breakdown['cassettePrice'];
 
+        $taxRate = (new Product($idProduct))->getTaxesRate();
+        $priceWithTax = $this->getPriceCalculator()->applyTaxRate($price, $taxRate);
+        
         $currency = $this->context->currency;
-        $priceFormatted = $this->context->getCurrentLocale()->formatPrice($price, $currency->iso_code);
+        $priceFormatted = $this->context->getCurrentLocale()->formatPrice($priceWithTax, $currency->iso_code);
 
         $this->ajaxRender(json_encode([
             'success' => true,
-            'price' => $price,
+            'price' => $priceWithTax,
             'priceFormatted' => $priceFormatted,
         ]));
     }

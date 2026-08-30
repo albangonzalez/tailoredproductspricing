@@ -59,4 +59,9 @@ class PriceCalculator
             'cassettePrice' => max(0.0, round($cassettePrice, 6)),
         ];
     }
+
+    public function applyTaxRate(float $price, float $taxRate): float
+    {
+        return max(0.0, round($price * (1 + $taxRate / 100), 6));
+    }
 }
