@@ -79,12 +79,15 @@ class TailoredProductsAjaxModuleFrontController extends ModuleFrontController
         $reduction = $specificPriceReducer->computeReduction($priceWithTax, $specificPrice, (int) $currency->id, true, $taxRate);
         $finalPrice = max(0.0, $priceWithTax - $reduction);
 
-        $priceFormatted = $this->context->getCurrentLocale()->formatPrice($finalPrice, $currency->iso_code);
+        $locale = $this->context->getCurrentLocale();
+        $priceFormatted = $locale->formatPrice($finalPrice, $currency->iso_code);
+        $regularPriceFormatted = $locale->formatPrice($priceWithTax, $currency->iso_code);
 
         $this->ajaxRender(json_encode([
             'success' => true,
             'price' => $finalPrice,
             'priceFormatted' => $priceFormatted,
+            'regularPriceFormatted' => $regularPriceFormatted,
         ]));
     }
 

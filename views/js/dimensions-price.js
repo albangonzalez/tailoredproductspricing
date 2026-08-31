@@ -5,7 +5,9 @@
     var CONTAINER_ID = 'tpp-dimensions-form';
     var PRICE_SCOPE_SELECTOR = '.js-product-container';
     var PRICE_SELECTOR = '.js-product-prices .product__price';
+    var REGULAR_PRICE_SELECTOR = '.js-product-prices .product__regular-price';
     var BASE_HTML_KEY = 'tppBasePrice'; // data-tpp-base-price
+    var BASE_REGULAR_HTML_KEY = 'tppBaseRegularPrice'; // data-tpp-base-regular-price
 
     var debounceTimer = null;
 
@@ -82,15 +84,20 @@
         return scope.querySelector(PRICE_SELECTOR);
     }
 
-    function writeThemePrice(container, priceHtmlText) {
-        var el = getThemePriceElement(container);
-        if (!el) {
-            return;
-        }
-        if (el.dataset[BASE_HTML_KEY] === undefined) {
+    function getThemeRegularPriceElement(container) {
+        var scope = container.closest(PRICE_SCOPE_SELECTOR) || document;
+
+        // Only present in the DOM when the theme already rendered a discount
+        // for this product (see product-prices.tpl's `has_discount` guard) —
+        // absent otherwise, so every caller must tolerate a null return.
+        return scope.querySelector(REGULAR_PRICE_SELECTOR);
+    }
+
+    function writeIntoPriceNode(el, dataKey, valueClassName, priceHtmlText) {
+        if (el.dataset[dataKey] === undefined) {
             // Cached on the node itself, not in a JS variable: core replaces this
             // whole subtree on combination change, so the cache must die with it.
-            el.dataset[BASE_HTML_KEY] = el.innerHTML;
+            el.dataset[dataKey] = el.innerHTML;
         }
 
         var label = el.querySelector('.visually-hidden');
@@ -99,25 +106,50 @@
             el.appendChild(label);
         }
         var valueNode = document.createElement('span');
-        valueNode.className = 'tpp-price-value';
+        valueNode.className = valueClassName;
         valueNode.textContent = priceHtmlText || '';
         el.appendChild(valueNode);
     }
 
-    function restoreThemePrice(container) {
-        var el = getThemePriceElement(container);
-        if (!el || el.dataset[BASE_HTML_KEY] === undefined) {
+    function restorePriceNode(el, dataKey) {
+        if (!el || el.dataset[dataKey] === undefined) {
             return;
         }
-        el.innerHTML = el.dataset[BASE_HTML_KEY];
-        delete el.dataset[BASE_HTML_KEY];
+        el.innerHTML = el.dataset[dataKey];
+        delete el.dataset[dataKey];
     }
 
-    function updatePriceDisplay(container, state, priceText) {
+    function writeThemePrice(container, priceHtmlText) {
+        var el = getThemePriceElement(container);
+        if (!el) {
+            return;
+        }
+        writeIntoPriceNode(el, BASE_HTML_KEY, 'tpp-price-value', priceHtmlText);
+    }
+
+    function restoreThemePrice(container) {
+        restorePriceNode(getThemePriceElement(container), BASE_HTML_KEY);
+    }
+
+    function writeThemeRegularPrice(container, priceHtmlText) {
+        var el = getThemeRegularPriceElement(container);
+        if (!el) {
+            return;
+        }
+        writeIntoPriceNode(el, BASE_REGULAR_HTML_KEY, 'tpp-regular-price-value', priceHtmlText);
+    }
+
+    function restoreThemeRegularPrice(container) {
+        restorePriceNode(getThemeRegularPriceElement(container), BASE_REGULAR_HTML_KEY);
+    }
+
+    function updatePriceDisplay(container, state, priceText, regularPriceText) {
         if (state === 'ok') {
             writeThemePrice(container, priceText);
+            writeThemeRegularPrice(container, regularPriceText);
         } else {
             restoreThemePrice(container);
+            restoreThemeRegularPrice(container);
         }
     }
 
@@ -235,7 +267,7 @@
                 return;
             }
 
-            updatePriceDisplay(container, 'ok', result.body.priceFormatted);
+            updatePriceDisplay(container, 'ok', result.body.priceFormatted, result.body.regularPriceFormatted);
         }).catch(function () {
             if (!isCurrentSignature(config, signature)) {
                 return;
