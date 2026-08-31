@@ -89,3 +89,9 @@
     outline: 2px solid var(--bs-primary);
     outline-offset: 3px;
 }
+
+#add-to-cart-or-refresh {
+    .tpp-choices:last-of-type {
+        margin-bottom: 1.5rem;
+    }
+}
