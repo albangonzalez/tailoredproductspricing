@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Modules.Tailoredproducts.Shop.xlf" source-language="en" target-language="es-ES" datatype="plaintext">
+    <body>
+      <trans-unit id="fbb09688790d2759a8624abb0dfe3799">
+        <source>Control side</source>
+        <target state="translated">Lado de control</target>
+      </trans-unit>
+      <trans-unit id="945d5e233cf7d6240f6b783b36a374ff">
+        <source>Left</source>
+        <target state="translated">Izquierdo</target>
+      </trans-unit>
+      <trans-unit id="92b09c7c48c520c3c55e497875da437c">
+        <source>Right</source>
+        <target state="translated">Derecho</target>
+      </trans-unit>
+      <trans-unit id="75d6c016a847bb69f344313db62a5489">
+        <source>Cassette</source>
+        <target state="translated">Cenefa</target>
+      </trans-unit>
+      <trans-unit id="8079acbe56974391897bcf6c015bade7">
+        <source>Without cassette</source>
+        <target state="translated">Sin cenefa</target>
+      </trans-unit>
+      <trans-unit id="1d544757fd4027f1f5dbe8db043cd489">
+        <source>With cassette</source>
+        <target state="translated">Con cenefa</target>
+      </trans-unit>
+      <trans-unit id="1e6d41811d6936e847ebfad5ad282de2">
+        <source>Mechanism &amp; cord color</source>
+        <target state="translated">Color del mecanismo y cadena</target>
+      </trans-unit>
+      <trans-unit id="81d507f181717c39aff5682b0bb3f8ce">
+        <source>Roll direction</source>
+        <target state="translated">Sentido de enrollado</target>
+      </trans-unit>
+      <trans-unit id="72802f045500ec8f9ff6b47a40c062f0">
+        <source>Standard roll</source>
+        <target state="translated">Enrollado estándar</target>
+      </trans-unit>
+      <trans-unit id="6ee76fd703452821f23845452d9f7012">
+        <source>Reverse roll</source>
+        <target state="translated">Enrollado invertido</target>
+      </trans-unit>
+      <trans-unit id="f4843c1c797abf1a256c8802b6cd9f51">
+        <source>Dimensions</source>
+        <target state="translated">Dimensiones</target>
+      </trans-unit>
+      <trans-unit id="32954654ac8fe66a1d09be19001de2d4">
+        <source>Width</source>
+        <target state="translated">Ancho</target>
+      </trans-unit>
+      <trans-unit id="eec6c4bdbd339edf8cbea68becb85244">
+        <source>Height</source>
+        <target state="translated">Alto</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

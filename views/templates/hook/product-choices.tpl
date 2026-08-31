@@ -7,13 +7,13 @@
         <input type="radio" class="btn-check" name="tpp_cord_side"
                id="tpp_cord_side_left_{$idProduct|intval}" value="left" autocomplete="off">
         <label class="btn btn-outline-primary" for="tpp_cord_side_left_{$idProduct|intval}">
-            {l s='Izquierdo' d='Modules.Tailoredproducts.Shop'}
+            {l s='Left' d='Modules.Tailoredproducts.Shop'}
         </label>
 
         <input type="radio" class="btn-check" name="tpp_cord_side"
                id="tpp_cord_side_right_{$idProduct|intval}" value="right" autocomplete="off" checked>
         <label class="btn btn-outline-primary" for="tpp_cord_side_right_{$idProduct|intval}">
-            {l s='Derecho' d='Modules.Tailoredproducts.Shop'}
+            {l s='Right' d='Modules.Tailoredproducts.Shop'}
         </label>
     </div>
 </fieldset>
@@ -28,13 +28,13 @@
             <input type="radio" class="btn-check" name="tpp_cassette"
                    id="tpp_cassette_without_{$idProduct|intval}" value="without" autocomplete="off" checked>
             <label class="btn btn-outline-primary" for="tpp_cassette_without_{$idProduct|intval}">
-                {l s='Sin cenefa' d='Modules.Tailoredproducts.Shop'}
+                {l s='Without cassette' d='Modules.Tailoredproducts.Shop'}
             </label>
 
             <input type="radio" class="btn-check" name="tpp_cassette"
                    id="tpp_cassette_with_{$idProduct|intval}" value="with" autocomplete="off">
             <label class="btn btn-outline-primary" for="tpp_cassette_with_{$idProduct|intval}">
-                {l s='Con cenefa' d='Modules.Tailoredproducts.Shop'}
+                {l s='With cassette' d='Modules.Tailoredproducts.Shop'}
             </label>
         </div>
     </fieldset>
@@ -73,13 +73,13 @@
             <input type="radio" class="btn-check" name="tpp_roll_direction"
                    id="tpp_roll_direction_standard_{$idProduct|intval}" value="standard" autocomplete="off" checked>
             <label class="btn btn-outline-primary" for="tpp_roll_direction_standard_{$idProduct|intval}">
-                {l s='Enrollado estándar' d='Modules.Tailoredproducts.Shop'}
+                {l s='Standard roll' d='Modules.Tailoredproducts.Shop'}
             </label>
 
             <input type="radio" class="btn-check" name="tpp_roll_direction"
                    id="tpp_roll_direction_reverse_{$idProduct|intval}" value="reverse" autocomplete="off">
             <label class="btn btn-outline-primary" for="tpp_roll_direction_reverse_{$idProduct|intval}">
-                {l s='Enrollado invertido' d='Modules.Tailoredproducts.Shop'}
+                {l s='Reverse roll' d='Modules.Tailoredproducts.Shop'}
             </label>
         </div>
     </fieldset>
