@@ -26,6 +26,10 @@
         <source>Roll direction</source>
         <target state="translated">Sentido de enrollado</target>
       </trans-unit>
+      <trans-unit id="bd297aeb1781ddb6835c6b9595efa4cf">
+        <source>Mount type</source>
+        <target state="translated">Tipo de instalación</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

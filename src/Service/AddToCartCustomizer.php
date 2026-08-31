@@ -35,12 +35,18 @@ use Validate;
  * Pricing (see .claude/docs/specs/add-to-cart-pricing.md): once the
  * `customized_data` rows exist, {@see self::stampPrices()} prices and stamps
  * them via `PriceCalculator`/`PriceWriter`.
+ *
+ * Also persists the mount-type choice (wall / ceiling, `.claude/docs/specs/mount-type-choice.md`)
+ * alongside dimensions, cord side, cassette, mechanism color and roll
+ * direction — a pure boolean-style pick with no price effect at all; its
+ * `customized_data` row is always stamped `0.0`, never priced.
  */
 class AddToCartCustomizer
 {
     private const CASSETTE_VALUES = ['without', 'with'];
     private const CASSETTE_SELECTED = 'with';
     private const ROLL_DIRECTION_VALUES = ['standard', 'reverse'];
+    private const MOUNT_TYPE_VALUES = ['wall', 'ceiling'];
 
     public function __construct(
         private readonly TailoredProductSettingsRepository $productConfigRepository,
@@ -93,7 +99,11 @@ class AddToCartCustomizer
         $hasRollDirection = in_array($rollDirection, self::ROLL_DIRECTION_VALUES, true)
             && isset($fieldIds[CustomizationFieldRegistry::SLUG_ROLL_DIRECTION]);
 
-        if (!$hasDimensions && !$hasCordSide && !$hasCassette && !$hasMechanismColor && !$hasRollDirection) {
+        $mountType = (string) Tools::getValue('tpp_mount_type');
+        $hasMountType = in_array($mountType, self::MOUNT_TYPE_VALUES, true)
+            && isset($fieldIds[CustomizationFieldRegistry::SLUG_MOUNT_TYPE]);
+
+        if (!$hasDimensions && !$hasCordSide && !$hasCassette && !$hasMechanismColor && !$hasRollDirection && !$hasMountType) {
             return;
         }
 
@@ -128,6 +138,10 @@ class AddToCartCustomizer
             $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_ROLL_DIRECTION], Product::CUSTOMIZE_TEXTFIELD, $rollDirection, true);
         }
 
+        if ($hasMountType) {
+            $idCustomization = $cart->addTextFieldToProduct($idProduct, $fieldIds[CustomizationFieldRegistry::SLUG_MOUNT_TYPE], Product::CUSTOMIZE_TEXTFIELD, $mountType, true);
+        }
+
         if ($idCustomization === false) {
             return;
         }
@@ -141,6 +155,7 @@ class AddToCartCustomizer
             'cassetteSelected' => $cassette === self::CASSETTE_SELECTED,
             'hasMechanismColor' => $hasMechanismColor,
             'hasRollDirection' => $hasRollDirection,
+            'hasMountType' => $hasMountType,
         ]);
 
         $_POST['id_customization'] = (int) $idCustomization;
@@ -175,7 +190,7 @@ class AddToCartCustomizer
      * .claude/docs/specs/add-to-cart-pricing.md §5.4).
      *
      * @param array<string, int> $fieldIds slug => id, see {@see self::getFieldIds()}
-     * @param array{width: string, height: string, hasDimensions: bool, hasCordSide: bool, hasCassette: bool, cassetteSelected: bool, hasMechanismColor: bool, hasRollDirection: bool} $submitted
+     * @param array{width: string, height: string, hasDimensions: bool, hasCordSide: bool, hasCassette: bool, cassetteSelected: bool, hasMechanismColor: bool, hasRollDirection: bool, hasMountType: bool} $submitted
      */
     private function stampPrices(
         int $idCustomization,
@@ -234,6 +249,12 @@ class AddToCartCustomizer
             $idRollDirection = $fieldIds[CustomizationFieldRegistry::SLUG_ROLL_DIRECTION];
             $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idRollDirection, 0.0);
             $writtenIndexes[] = $idRollDirection;
+        }
+
+        if ($submitted['hasMountType']) {
+            $idMountType = $fieldIds[CustomizationFieldRegistry::SLUG_MOUNT_TYPE];
+            $this->priceWriter->stamp($idCustomization, Product::CUSTOMIZE_TEXTFIELD, $idMountType, 0.0);
+            $writtenIndexes[] = $idMountType;
         }
 
         // The set of module-owned indexes PriceWriter::resetStaleRows() may

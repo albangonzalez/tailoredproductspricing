@@ -21,6 +21,7 @@ final class SqlQueries
               `cassette_price_per_meter` decimal(20,2) DEFAULT NULL,
               `id_attribute_group_mechanism_color` int(10) unsigned DEFAULT NULL,
               `roll_direction_enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,
+              `mount_type_enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,
               `is_matrix` tinyint(1) unsigned NOT NULL DEFAULT 0,
               PRIMARY KEY (`id_product`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;',

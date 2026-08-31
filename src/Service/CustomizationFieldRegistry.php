@@ -12,7 +12,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Owns the lifecycle of the native `customization_field` rows (Width,
- * Height, Cord side, Cassette, Mechanism color, Roll direction) that carry a tailored
+ * Height, Cord side, Cassette, Mechanism color, Roll direction, Mount type) that carry a tailored
  * product's entered choices (spec Iteration 6, D1/6-E), so the merchant
  * never touches PrestaShop's own Customization tab.
  *
@@ -45,7 +45,7 @@ final class CustomizationFieldRegistry
     private const TRANSLATION_DOMAIN = 'Modules.Tailoredproducts.Admin';
 
     /**
-     * Public, named constants for the six field slugs — the shared source of
+     * Public, named constants for the seven field slugs — the shared source of
      * truth for both this class and any other consumer (e.g.
      * {@see \PrestaShop\Module\TailoredProducts\Service\AddToCartCustomizer})
      * that needs to select a specific slot out of a slug-keyed map. Prefer
@@ -59,11 +59,12 @@ final class CustomizationFieldRegistry
     public const SLUG_CASSETTE = 'cassette';
     public const SLUG_MECHANISM_COLOR = 'mechanism_color';
     public const SLUG_ROLL_DIRECTION = 'roll_direction';
+    public const SLUG_MOUNT_TYPE = 'mount_type';
 
     /**
-     * The single source of truth for the six (product, slug) rows this
+     * The single source of truth for the seven (product, slug) rows this
      * module provisions in `tailored_product_customization_field`. Any code
-     * needing "all six slugs" (e.g. `getStoredFieldIds()`'s default map)
+     * needing "all seven slugs" (e.g. `getStoredFieldIds()`'s default map)
      * must read this constant rather than restring the list.
      */
     private const FIELD_SLUGS = [
@@ -73,6 +74,7 @@ final class CustomizationFieldRegistry
         self::SLUG_CASSETTE,
         self::SLUG_MECHANISM_COLOR,
         self::SLUG_ROLL_DIRECTION,
+        self::SLUG_MOUNT_TYPE,
     ];
 
     /** Slug => English label for the fields provisioned unconditionally. */
@@ -87,6 +89,7 @@ final class CustomizationFieldRegistry
         self::SLUG_CASSETTE => 'Cassette',
         self::SLUG_MECHANISM_COLOR => 'Mechanism color',
         self::SLUG_ROLL_DIRECTION => 'Roll direction',
+        self::SLUG_MOUNT_TYPE => 'Mount type',
     ];
 
     public function __construct(

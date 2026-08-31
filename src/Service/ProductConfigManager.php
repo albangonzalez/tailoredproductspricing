@@ -42,6 +42,7 @@ final class ProductConfigManager
             'tpp_cassette_price' => $config ? $config->getCassettePricePerMeter() : null,
             'tpp_mechanism_color_group' => $config ? $config->getIdAttributeGroupMechanismColor() : null,
             'tpp_roll_direction_enabled' => ($config && $config->isRollDirectionEnabled()) ? 1 : 0,
+            'tpp_mount_type_enabled' => ($config && $config->isMountTypeEnabled()) ? 1 : 0,
         ];
     }
 
@@ -76,7 +77,8 @@ final class ProductConfigManager
             ->setMaxHeight($this->nullableDecimal($tppSettings['tpp_max_height'] ?? null))
             ->setCassettePricePerMeter($this->cassettePrice($tppSettings))
             ->setIdAttributeGroupMechanismColor($this->mechanismColorGroupId($tppSettings))
-            ->setRollDirectionEnabled((bool) ($tppSettings['tpp_roll_direction_enabled'] ?? false));
+            ->setRollDirectionEnabled((bool) ($tppSettings['tpp_roll_direction_enabled'] ?? false))
+            ->setMountTypeEnabled((bool) ($tppSettings['tpp_mount_type_enabled'] ?? false));
 
         // Persist the base settings first so the `tailored_product_settings`
         // row exists for the registry to record the resolved field ids onto.
@@ -86,6 +88,7 @@ final class ProductConfigManager
             'cassette' => $config->getCassettePricePerMeter() !== null,
             'mechanism_color' => $config->getIdAttributeGroupMechanismColor() !== null,
             'roll_direction' => $config->isRollDirectionEnabled(),
+            'mount_type' => $config->isMountTypeEnabled(),
         ]);
     }
 
@@ -113,6 +116,7 @@ final class ProductConfigManager
             'cassette_price_per_meter' => $config->getCassettePricePerMeter(),
             'id_attribute_group_mechanism_color' => $config->getIdAttributeGroupMechanismColor(),
             'roll_direction_enabled' => $config->isRollDirectionEnabled(),
+            'mount_type_enabled' => $config->isMountTypeEnabled(),
         ];
     }
 

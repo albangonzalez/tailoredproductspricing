@@ -84,3 +84,25 @@
         </div>
     </fieldset>
 {/if}
+
+{if $mountTypeEnabled}
+    <fieldset class="tpp-choices">
+        <legend class="form-label tpp-choices__legend">
+            {l s='Mount type' d='Modules.Tailoredproducts.Shop'}
+        </legend>
+
+        <div class="btn-group tpp-choices__group" role="group">
+            <input type="radio" class="btn-check" name="tpp_mount_type"
+                   id="tpp_mount_type_wall_{$idProduct|intval}" value="wall" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="tpp_mount_type_wall_{$idProduct|intval}">
+                {l s='Wall mount' d='Modules.Tailoredproducts.Shop'}
+            </label>
+
+            <input type="radio" class="btn-check" name="tpp_mount_type"
+                   id="tpp_mount_type_ceiling_{$idProduct|intval}" value="ceiling" autocomplete="off">
+            <label class="btn btn-outline-primary" for="tpp_mount_type_ceiling_{$idProduct|intval}">
+                {l s='Ceiling mount' d='Modules.Tailoredproducts.Shop'}
+            </label>
+        </div>
+    </fieldset>
+{/if}

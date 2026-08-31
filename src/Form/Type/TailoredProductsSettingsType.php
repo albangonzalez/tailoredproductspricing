@@ -94,6 +94,15 @@ class TailoredProductsSettingsType extends AbstractType
                 'row_attr' => ['class' => self::FIELD_CLASS],
                 'translation_domain' => self::DOMAIN,
                 'form_theme' => self::FORM_THEME,
+            ])
+            ->add('tpp_mount_type_enabled', SwitchType::class, [
+                'label' => 'Offer a mount type choice (wall / ceiling)',
+                'help' => 'Lets the customer choose whether the shade is mounted on the wall or on the ceiling. Does not affect the price.',
+                'required' => false,
+                'show_choices' => false,
+                'row_attr' => ['class' => self::FIELD_CLASS],
+                'translation_domain' => self::DOMAIN,
+                'form_theme' => self::FORM_THEME,
             ]);
     }
 

@@ -99,6 +99,22 @@ class TailoredProductSettings
     private $rollDirectionEnabled = false;
 
     /**
+     * Whether the wall/ceiling mount-type choice is offered for this product.
+     * Like {@see self::$rollDirectionEnabled} (and unlike the cassette price
+     * and the mechanism-color group), this choice carries no value of its own,
+     * so it gets an explicit flag column rather than overloading the nullness
+     * of a settings column — and never the presence of the module's
+     * provisioned `customization_field` row for this slug in
+     * `tailored_product_customization_field`, which is provisioning state, not
+     * merchant intent.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="mount_type_enabled", type="boolean", options={"unsigned"=true, "default"=0})
+     */
+    private $mountTypeEnabled = false;
+
+    /**
      * @ORM\Column(type="boolean", options={"unsigned"=true, "default"=0})
      */
     private $isMatrix = false;
@@ -193,6 +209,18 @@ class TailoredProductSettings
     public function setRollDirectionEnabled(bool $rollDirectionEnabled): self
     {
         $this->rollDirectionEnabled = $rollDirectionEnabled;
+
+        return $this;
+    }
+
+    public function isMountTypeEnabled(): bool
+    {
+        return $this->mountTypeEnabled;
+    }
+
+    public function setMountTypeEnabled(bool $mountTypeEnabled): self
+    {
+        $this->mountTypeEnabled = $mountTypeEnabled;
 
         return $this;
     }

@@ -42,6 +42,18 @@
         <source>Reverse roll</source>
         <target state="translated">Enrollado invertido</target>
       </trans-unit>
+      <trans-unit id="bd297aeb1781ddb6835c6b9595efa4cf">
+        <source>Mount type</source>
+        <target state="translated">Tipo de instalación</target>
+      </trans-unit>
+      <trans-unit id="36d40ebd47f1b544bbd1f216579e74bd">
+        <source>Wall mount</source>
+        <target state="translated">A muro</target>
+      </trans-unit>
+      <trans-unit id="60213299166b134038a6fe1c3cdec54a">
+        <source>Ceiling mount</source>
+        <target state="translated">A techo</target>
+      </trans-unit>
       <trans-unit id="f4843c1c797abf1a256c8802b6cd9f51">
         <source>Dimensions</source>
         <target state="translated">Dimensiones</target>
